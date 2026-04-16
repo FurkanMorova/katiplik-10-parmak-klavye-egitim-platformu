@@ -1,0 +1,78 @@
+.container {
+  width: 100%;
+  padding: 1.5rem;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  position: relative;
+  outline: none;
+  font-family: var(--font-mono), monospace;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  transition: all 0.3s ease;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.focusWarning {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 17, 23, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 16px;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.word {
+  margin-right: 0.3em;
+  display: inline; /* Yan yana akış */
+}
+
+.char {
+  position: relative;
+  color: var(--text-secondary);
+  transition: color 0.1s ease;
+}
+
+.correct {
+  color: var(--text-primary);
+}
+
+.incorrect {
+  color: var(--error);
+  text-decoration: underline;
+  text-decoration-color: var(--error);
+}
+
+.active {
+  color: var(--text-primary);
+  background: rgba(59, 130, 246, 0.2); /* Hafif arka plan vurgusu */
+  border-radius: 2px;
+}
+
+/* Caret for the current active character */
+.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
