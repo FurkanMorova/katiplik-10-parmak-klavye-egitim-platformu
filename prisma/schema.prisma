@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
@@ -24,11 +25,14 @@ model LessonResult {
   id          String   @id @default(uuid())
   userId      String
   lessonId    String   // "f-1", "q-4" veya sınav metni id'si
-  wpm         Int
-  errors      Int
-  timeSeconds Float
-  accuracy    Float
-  createdAt   DateTime @default(now())
+  wpm          Int
+  errors       Int
+  timeSeconds  Float
+  accuracy     Float
+  correctWords Int      @default(0)
+  incorrectWords Int    @default(0)
+  errorRate    Float    @default(0)
+  createdAt    DateTime @default(now())
 
   user        User     @relation(fields: [userId], references: [id])
 }
@@ -36,7 +40,7 @@ model LessonResult {
 model ExamContent {
   id        String   @id @default(uuid())
   title     String
-  content   String   @db.LongText
+  content   String   @db.Text
   createdAt DateTime @default(now())
 }
 

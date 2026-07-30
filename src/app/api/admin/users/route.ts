@@ -28,6 +28,9 @@ export async function GET(req: NextRequest) {
       const totalWpm = st.results.reduce((acc, r) => acc + r.wpm, 0);
       const totalErrors = st.results.reduce((acc, r) => acc + r.errors, 0);
       const totalTime = st.results.reduce((acc, r) => acc + r.timeSeconds, 0);
+      const totalCorrectWords = st.results.reduce((acc, r) => acc + (r.correctWords || 0), 0);
+      const totalIncorrectWords = st.results.reduce((acc, r) => acc + (r.incorrectWords || 0), 0);
+      const totalErrorRate = st.results.reduce((acc, r) => acc + (r.errorRate || 0), 0);
 
       // Ders bazlı gruplama
       const lessonMap: Record<string, any> = {};
@@ -38,7 +41,10 @@ export async function GET(req: NextRequest) {
             count: 0,
             totalWpm: 0,
             totalErrors: 0,
-            totalTime: 0
+            totalTime: 0,
+            totalCorrectWords: 0,
+            totalIncorrectWords: 0,
+            totalErrorRate: 0
           };
         }
         const l = lessonMap[r.lessonId];
@@ -46,6 +52,9 @@ export async function GET(req: NextRequest) {
         l.totalWpm += r.wpm;
         l.totalErrors += r.errors;
         l.totalTime += r.timeSeconds;
+        l.totalCorrectWords += r.correctWords || 0;
+        l.totalIncorrectWords += r.incorrectWords || 0;
+        l.totalErrorRate += r.errorRate || 0;
       });
 
       const perLessonStats = Object.values(lessonMap).map((l: any) => ({
@@ -53,7 +62,10 @@ export async function GET(req: NextRequest) {
         count: l.count,
         avgWpm: Math.round(l.totalWpm / l.count),
         avgErrors: (l.totalErrors / l.count).toFixed(1),
-        avgTime: (l.totalTime / l.count).toFixed(1)
+        avgTime: (l.totalTime / l.count).toFixed(1),
+        avgCorrectWords: Math.round(l.totalCorrectWords / l.count),
+        avgIncorrectWords: Math.round(l.totalIncorrectWords / l.count),
+        avgErrorRate: (l.totalErrorRate / l.count).toFixed(1)
       }));
 
       return {
@@ -67,6 +79,9 @@ export async function GET(req: NextRequest) {
           avgWpm: totalResults > 0 ? Math.round(totalWpm / totalResults) : 0,
           avgErrors: totalResults > 0 ? (totalErrors / totalResults).toFixed(1) : 0,
           avgTime: totalResults > 0 ? (totalTime / totalResults).toFixed(1) : 0,
+          avgCorrectWords: totalResults > 0 ? Math.round(totalCorrectWords / totalResults) : 0,
+          avgIncorrectWords: totalResults > 0 ? Math.round(totalIncorrectWords / totalResults) : 0,
+          avgErrorRate: totalResults > 0 ? (totalErrorRate / totalResults).toFixed(1) : 0,
         },
         perLessonStats
       };

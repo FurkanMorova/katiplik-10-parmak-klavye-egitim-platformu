@@ -8,6 +8,7 @@ const footerLinks = {
     { label: 'Q Klavye Dersleri', href: '/#egitimler' },
     { label: 'Katiplik Sınavı Modu', href: '/' },
     { label: 'Nasıl Çalışılır?', href: '/nasil-calisir' },
+    { label: 'Blog & Tüyolar', href: '/blog' },
   ],
   kurumsal: [
     { label: 'Hakkımızda', href: '/hakkimizda' },
@@ -21,7 +22,7 @@ export default function Footer() {
   return (
     <footer style={{
       borderTop: '1px solid var(--border-subtle)',
-      background: 'rgba(8, 10, 18, 0.8)',
+      background: 'var(--header-bg)',
       backdropFilter: 'blur(20px)',
       padding: '4rem 0 2rem',
       marginTop: 'auto',

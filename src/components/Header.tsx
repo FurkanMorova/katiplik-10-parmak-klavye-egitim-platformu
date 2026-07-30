@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const [authState, setAuthState] = useState<{ authenticated: boolean; user?: any }>({ authenticated: false });
@@ -39,10 +40,10 @@ export default function Header() {
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      background: scrolled ? 'rgba(10, 12, 20, 0.95)' : 'rgba(10, 12, 20, 0.7)',
+      background: scrolled ? 'var(--header-bg-scrolled)' : 'var(--header-bg)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
+      borderBottom: scrolled ? '1px solid var(--border-subtle)' : '1px solid transparent',
       padding: '0.85rem 0',
       transition: 'all 0.3s ease',
     }}>
@@ -85,6 +86,14 @@ export default function Header() {
             onMouseEnter={e => { if (pathname !== '/iletisim') e.currentTarget.style.color = 'var(--text-primary)'; }}
             onMouseLeave={e => { if (pathname !== '/iletisim') e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >İletişim</Link>
+          <Link
+            href="/blog"
+            style={navLinkStyle('/blog')}
+            onMouseEnter={e => { if (pathname !== '/blog') e.currentTarget.style.color = 'var(--text-primary)'; }}
+            onMouseLeave={e => { if (pathname !== '/blog') e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          >Blog</Link>
+
+          <ThemeToggle />
 
           {authState.authenticated ? (
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -105,6 +114,19 @@ export default function Header() {
                 </div>
                 {authState.user?.firstName}
               </div>
+              <Link href="/profil" style={{
+                color: 'var(--text-primary)',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                background: 'var(--bg-glass)',
+                padding: '0.35rem 0.9rem',
+                borderRadius: '8px',
+                border: '1px solid var(--border-subtle)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-glass-hover)'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
+              >📈 Profilim</Link>
               <button
                 onClick={handleLogout}
                 style={{ background: 'transparent', border: '1px solid rgba(240, 82, 82, 0.3)', color: 'var(--error)', padding: '0.35rem 0.9rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s' }}

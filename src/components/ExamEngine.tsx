@@ -5,15 +5,24 @@ import StatsHeader from './StatsHeader';
 import TextDisplay from './TextDisplay';
 import { useTypingEngine } from '../utils/useTypingEngine';
 import { useLocalStorage } from '../utils/useLocalStorage';
+import { useAudioFeedback } from '../utils/useAudioFeedback';
+import HeatmapKeyboard from './HeatmapKeyboard';
+import { incrementGlobalStats } from '../lib/firebaseStats';
 
 interface ExamEngineProps {
+  examId: string;
   targetText: string;
   timeLimitSeconds: number | null;
+  keyboardType: 'F' | 'Q';
+  onRestart?: () => void;
 }
 
 export default function ExamEngine({
+  examId,
   targetText,
-  timeLimitSeconds
+  timeLimitSeconds,
+  keyboardType,
+  onRestart
 }: ExamEngineProps) {
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +35,17 @@ export default function ExamEngine({
 
   // Metni temizle (Gereksiz boşluklar ve satır başlarını kaldır)
   const sanitizedText = targetText.replace(/\s+/g, ' ').trim();
-  const { state, handleKeyDown, reset } = useTypingEngine(sanitizedText, timeLimitSeconds);
+  
+  const [globalHeatmap, setGlobalHeatmap] = useLocalStorage<Record<string, {hits: number, misses: number}>>("klavye_global_heatmap", {});
+  const [audioEnabled, setAudioEnabled] = useLocalStorage('klavye_audio_pref', true);
+
+  const { playHit, playError } = useAudioFeedback();
+
+  const { state, handleKeyDown, reset } = useTypingEngine(sanitizedText, {
+    timeLimitSeconds,
+    onKeyHit: () => { if (audioEnabled) playHit(); },
+    onKeyError: () => { if (audioEnabled) playError(); }
+  });
 
   // Focus the textarea initially and when clicking the container
   useEffect(() => {
@@ -46,25 +65,56 @@ export default function ExamEngine({
         highestWpm: Math.max(prev.highestWpm, state.wpm),
         testsCompleted: prev.testsCompleted + 1
       }));
+
+      // Async increment the global firebase stat
+      incrementGlobalStats().catch(err => console.warn('Could not increment global stats', err));
+
+      // Veritabanına da istatistiği gönder
+      fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lessonId: `exam-${examId}`,
+          wpm: state.wpm,
+          errors: state.errors,
+          timeSeconds: state.timeElapsed,
+          accuracy: state.accuracy,
+          correctWords: state.correctWords,
+          incorrectWords: state.incorrectWords,
+          errorRate: state.errorRate
+        })
+      }).catch(err => console.warn('Could not post exam stats', err));
+
+      setGlobalHeatmap((prev: any) => {
+        const next = { ...prev };
+        Object.keys(state.heatmapStats).forEach(char => {
+           if (!next[char]) next[char] = { hits: 0, misses: 0 };
+           next[char].hits += state.heatmapStats[char].hits;
+           next[char].misses += state.heatmapStats[char].misses;
+        });
+        return next;
+      });
     }
-  }, [state.isComplete, state.wpm, setStats]);
+  }, [state.isComplete, state.wpm, state.errors, state.timeElapsed, state.accuracy, state.correctWords, state.incorrectWords, state.errorRate, examId, state.heatmapStats, setStats, setGlobalHeatmap]);
 
   const handleRestart = () => {
     scoreSavedRef.current = false;
     reset();
+    if (onRestart) onRestart();
     setTimeout(() => {
       containerRef.current?.querySelector('textarea')?.focus();
     }, 100);
   };
 
   const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // If it's a single char or backspace, let the engine handle it
-    // We pass the native event to handleKeyDown
+    // Tüm tuşlar için default browser davranışını engelle
+    // (Textarea'ya native yazı yazmasını engelle, sadece engine kontrol etsin)
+    e.preventDefault();
     handleKeyDown(e.nativeEvent as unknown as KeyboardEvent);
   };
 
   return (
-    <div className="typing-engine-container" ref={containerRef}>
+    <div className="typing-engine-container exam-wide" ref={containerRef}>
       <StatsHeader 
         wpm={state.wpm}
         accuracy={state.accuracy}
@@ -72,16 +122,26 @@ export default function ExamEngine({
         timeElapsed={state.timeElapsed}
         timeLimit={timeLimitSeconds}
         hideStats={!state.isComplete}
+        correctWords={state.correctWords}
+        incorrectWords={state.incorrectWords}
+        errorRate={state.errorRate}
       />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', opacity: state.isComplete ? 0.3 : 1 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={audioEnabled} onChange={e => setAudioEnabled(e.target.checked)} style={{ cursor: 'pointer' }} />
+          🎧 Tuş Sesi
+        </label>
+      </div>
 
       <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Üst Kısım: Rehber Metin (5 Satır Sınırlı ve Kayan) */}
         <div style={{ 
-          height: '230px',
+          height: '380px',
           overflowY: 'hidden', 
           borderRadius: '12px', 
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          background: 'rgba(0,0,0,0.25)'
+          border: '1px solid var(--border-medium)',
+          background: 'var(--bg-glass)'
         }}>
           <TextDisplay 
             targetText={sanitizedText}
@@ -96,9 +156,9 @@ export default function ExamEngine({
           <div style={{
             padding: '1.5rem',
             borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.12)',
-            background: 'rgba(255, 255, 255, 0.05)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+            border: '1px solid var(--border-medium)',
+            background: 'var(--bg-glass)',
+            boxShadow: 'none',
           }}>
             <textarea
               value={state.typedText}
@@ -111,7 +171,7 @@ export default function ExamEngine({
                 minHeight: '150px',
                 background: 'transparent',
                 border: 'none',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 fontSize: '1.2rem',
                 lineHeight: '1.8',
                 resize: 'none',
@@ -125,17 +185,32 @@ export default function ExamEngine({
       </div>
 
       {state.isComplete && (
-        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-glass)' }}>
           <h2 style={{ marginBottom: '1rem', color: timeLimitSeconds ? 'var(--error)' : 'var(--success)' }}>
             {timeLimitSeconds ? 'Süre Doldu! Katiplik Sınavınız Bitti' : 'Tebrikler! Metni Tamamladınız'}
           </h2>
-          <p style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>
-            Net Hızınız: <strong>{state.wpm} WPM</strong>
+          <p style={{ marginBottom: '1rem', fontSize: '1.2rem', lineHeight: '1.8' }}>
+            Süre: <strong>{state.timeElapsed} sn</strong>
             <br />
             Doğruluk: <strong>{state.accuracy}%</strong>
             <br />
+            Net Hız: <strong style={{color: 'var(--accent-color)'}}>{state.wpm} DBK</strong>
+            <br />
+            Toplam Vuruş: <strong>{state.totalKeystrokes}</strong>
+            <br />
             Hatalı Vuruş: <strong>{state.errors}</strong>
+            <br />
+            Doğru Kelime: <strong style={{color: 'var(--success)'}}>{state.correctWords}</strong>
+            <br />
+            Yanlış Kelime: <strong style={{color: 'var(--error)'}}>{state.incorrectWords}</strong>
+            <br />
+            Hata Oranı: <strong style={{color: 'var(--error)'}}>%{state.errorRate}</strong>
           </p>
+
+          <div style={{ marginBottom: '2rem' }}>
+             <HeatmapKeyboard stats={state.heatmapStats} keyboardType={keyboardType} />
+          </div>
+
           <div style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
             {state.wpm > 90 ? (
                <span style={{color: 'var(--success)'}}>Tebrikler! Mükemmel bir skor. Katilip sınavı barajını rahatlıkla geçiyorsunuz.</span>

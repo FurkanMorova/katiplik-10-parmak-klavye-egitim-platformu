@@ -8,6 +8,8 @@ import { useTypingEngine } from '../utils/useTypingEngine';
 import { generateRandomText } from '../utils/generateRandomText';
 import { useLocalStorage } from '../utils/useLocalStorage';
 import { incrementGlobalStats } from '../lib/firebaseStats';
+import { useAudioFeedback } from '../utils/useAudioFeedback';
+import HeatmapKeyboard from './HeatmapKeyboard';
 
 interface TypingEngineProps {
   lessonId: string;
@@ -44,18 +46,28 @@ export default function TypingEngine({
 
   // Per-lesson stats storage
   const [lessonStats, setLessonStats] = useLocalStorage<Record<string, any>>("klavye_lesson_stats", {});
+  const [globalHeatmap, setGlobalHeatmap] = useLocalStorage<Record<string, {hits: number, misses: number}>>("klavye_global_heatmap", {});
 
-  // Generate text once on mount or when allowed chars change
+  // Audio Feature
+  const [audioEnabled, setAudioEnabled] = useLocalStorage('klavye_audio_pref', true);
+  const { playHit, playError } = useAudioFeedback();
+
+  const { state, handleKeyDown, reset } = useTypingEngine(targetText, {
+    timeLimitSeconds,
+    onKeyHit: () => { if (audioEnabled) playHit(); },
+    onKeyError: () => { if (audioEnabled) playError(); },
+    blockOnError: true
+  });
+
+  // Generate text once on mount or when lesson parameters change
   useEffect(() => {
-    // Basic prevention of double generation in StrictMode
-    if (!contentGeneratedRef.current || targetText === "") {
-      const text = generateRandomText(allowedCharacters, wordCount, 5, customWords);
-      setTargetText(text);
-      contentGeneratedRef.current = true;
-    }
-  }, [allowedCharacters, wordCount, targetText, customWords]);
-
-  const { state, handleKeyDown, reset } = useTypingEngine(targetText, timeLimitSeconds);
+    const text = generateRandomText(allowedCharacters, wordCount, 5, customWords);
+    setTargetText(text);
+    contentGeneratedRef.current = true;
+    scoreSavedRef.current = false;
+    reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId, allowedCharacters, wordCount, customWords]);
 
   // Global keydown capture
   useEffect(() => {
@@ -95,7 +107,10 @@ export default function TypingEngine({
           wpm: state.wpm,
           errors: state.errors,
           timeSeconds: state.timeElapsed,
-          accuracy: state.wpm > 0 ? ((state.wpm * 5) / ((state.wpm * 5) + state.errors)) * 100 : 0 // Rough estimation for generic accuracy if wanted
+          accuracy: state.wpm > 0 ? ((state.wpm * 5) / ((state.wpm * 5) + state.errors)) * 100 : 0, // Rough estimation for generic accuracy if wanted
+          correctWords: state.correctWords,
+          incorrectWords: state.incorrectWords,
+          errorRate: state.errorRate
         })
       }).catch(err => console.warn('Could not post local stats', err));
 
@@ -111,8 +126,18 @@ export default function TypingEngine({
           }
         };
       });
+
+      setGlobalHeatmap((prev: any) => {
+        const next = { ...prev };
+        Object.keys(state.heatmapStats).forEach(char => {
+           if (!next[char]) next[char] = { hits: 0, misses: 0 };
+           next[char].hits += state.heatmapStats[char].hits;
+           next[char].misses += state.heatmapStats[char].misses;
+        });
+        return next;
+      });
     }
-  }, [state.isComplete, state.wpm, state.errors, state.timeElapsed, lessonId, setStats, setLessonStats]);
+  }, [state.isComplete, state.wpm, state.errors, state.timeElapsed, state.accuracy, state.correctWords, state.incorrectWords, state.errorRate, lessonId, state.heatmapStats, setStats, setLessonStats, setGlobalHeatmap]);
 
   const expectedChar = targetText[state.typedText.length] || null;
 
@@ -135,7 +160,16 @@ export default function TypingEngine({
         errors={state.errors}
         timeElapsed={state.timeElapsed}
         timeLimit={timeLimitSeconds}
+        correctWords={state.correctWords}
+        errorRate={state.errorRate}
       />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={audioEnabled} onChange={e => setAudioEnabled(e.target.checked)} style={{ cursor: 'pointer' }} />
+          🎧 Tuş Sesi
+        </label>
+      </div>
 
       <TextDisplay 
         targetText={targetText}
@@ -154,7 +188,16 @@ export default function TypingEngine({
             Toplam Basış: <strong>{state.totalKeystrokes}</strong>
             <br />
             Hatalı Basış: <strong>{state.errors}</strong>
+            <br />
+            Doğru Kelime: <strong style={{color: 'var(--success)'}}>{state.correctWords}</strong>
+            <br />
+            Hata Oranı: <strong style={{color: 'var(--error)'}}>%{state.errorRate}</strong>
           </p>
+
+          <div style={{ marginBottom: '2rem' }}>
+             <HeatmapKeyboard stats={state.heatmapStats} keyboardType={keyboardType} />
+          </div>
+
           {state.wpm >= targetWpm ? (
             <p style={{ color: 'var(--success)', marginBottom: '1.5rem', fontWeight: 'bold' }}>🎉 Hedefinize ulaştınız!</p>
           ) : (

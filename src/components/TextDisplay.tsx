@@ -60,8 +60,8 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
         position: 'relative',
         padding: '1.5rem',
         outline: 'none',
-        background: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--bg-glass)',
+        border: '1px solid var(--border-subtle)',
         borderRadius: '14px',
       }}
     >
@@ -98,8 +98,8 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
                   if (typedChar !== undefined) {
                     color = typedChar === char ? 'var(--text-primary)' : 'var(--error)';
                   } else if (isActiveCursor) {
-                    color = '#fff';
-                    bg = 'rgba(59,130,246,0.25)';
+                    color = 'var(--text-primary)';
+                    bg = 'var(--accent-light)';
                   }
                   if (typedChar !== undefined && typedChar !== char) decorationLine = 'underline';
                 }
@@ -133,8 +133,8 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
                   if (typedSpace !== undefined) {
                     color = typedSpace === ' ' ? 'var(--text-primary)' : 'var(--error)';
                   } else if (isActiveCursor) {
-                    color = '#fff';
-                    bg = 'rgba(59,130,246,0.25)';
+                    color = 'var(--text-primary)';
+                    bg = 'var(--accent-light)';
                   }
                 }
 

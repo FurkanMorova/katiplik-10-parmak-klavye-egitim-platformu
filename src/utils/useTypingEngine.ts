@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface TypingEngineState {
   typedText: string;
@@ -10,50 +10,108 @@ export interface TypingEngineState {
   timeElapsed: number; // in seconds
   isComplete: boolean;
   isActive: boolean;
+  correctWords: number;
+  incorrectWords: number;
+  errorRate: number;
+  heatmapStats: Record<string, { hits: number, misses: number }>;
 }
 
-export const useTypingEngine = (targetText: string, timeLimitSeconds: number | null = null) => {
+export interface EngineOptions {
+  timeLimitSeconds?: number | null;
+  onKeyHit?: () => void;
+  onKeyError?: () => void;
+  blockOnError?: boolean;
+}
+
+export const useTypingEngine = (targetText: string, options: EngineOptions = {}) => {
+  const { timeLimitSeconds = null, onKeyHit, onKeyError, blockOnError = false } = options;
   const [typedText, setTypedText] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [errors, setErrors] = useState(0);
   const [backspaceCount, setBackspaceCount] = useState(0);
   const [totalKeystrokes, setTotalKeystrokes] = useState(0);
+  const heatmapStatsRef = useRef<Record<string, {hits: number, misses: number}>>({});
+  const typedTextRef = useRef("");
+  const startTimeRef = useRef<number | null>(null);
+  const endTimeRef = useRef<number | null>(null);
+  const optionsRef = useRef(options);
+
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
   
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Sayfa kaymasını engelle
-    if (e.key === ' ') {
-      // Eğer input/textarea içindeysek space'in normal işlevine (karakter ekleme) izin ver ama sayfanın aşağı kaymasını (varsayılan) engelle
+    // Sayfa kaymasını engelle - her zaman
+    if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
     }
 
+    // Tamamlandıysa hiçbir tuşu kabul etme
+    if (endTimeRef.current) return;
+
     if (e.key === 'Backspace') {
+      if (optionsRef.current.blockOnError) return; // Ders modunda backspace yok
       setBackspaceCount(prev => prev + 1);
       setTotalKeystrokes(prev => prev + 1);
       setTypedText(prev => prev.slice(0, -1));
+      typedTextRef.current = typedTextRef.current.slice(0, -1);
       return;
     }
     
     // Accept only single character visual keys
     if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-      if (!startTime) {
-        setStartTime(Date.now());
+      if (!startTimeRef.current) {
+        const now = Date.now();
+        startTimeRef.current = now;
+        setStartTime(now);
       }
       
-      const expectedChar = targetText[typedText.length];
+      // Basit karakter-indeks karşılaştırması
+      const currentIndex = typedTextRef.current.length;
+      
+      // Metin sonuna ulaşıldıysa daha fazla karakter kabul etme
+      if (currentIndex >= targetText.length) return;
+      
+      const expectedChar = targetText[currentIndex];
+      
+      // Heatmap istatistikleri (boşluk hariç)
+      if (expectedChar !== ' ') {
+         const keyChar = expectedChar.toLocaleUpperCase('tr-TR');
+         if (!heatmapStatsRef.current[keyChar]) {
+            heatmapStatsRef.current[keyChar] = { hits: 0, misses: 0 };
+         }
+         
+         if (e.key === expectedChar) {
+            heatmapStatsRef.current[keyChar].hits += 1;
+         } else {
+            heatmapStatsRef.current[keyChar].misses += 1;
+         }
+      }
+
       if (e.key !== expectedChar) {
         setErrors(prev => prev + 1);
+        optionsRef.current.onKeyError?.();
+        setTotalKeystrokes(prev => prev + 1);
+        if (optionsRef.current.blockOnError) {
+          return; // Ders modunda yanlışta ilerleme
+        }
+      } else {
+        optionsRef.current.onKeyHit?.();
+        setTotalKeystrokes(prev => prev + 1);
       }
       
-      setTotalKeystrokes(prev => prev + 1);
       setTypedText(prev => prev + e.key);
+      typedTextRef.current = typedTextRef.current + e.key;
       
       // Check for completion if typing based on string length (no time limit or normal mode)
-      if (!timeLimitSeconds && typedText.length + 1 >= targetText.length) {
-        setEndTime(Date.now());
+      if (!optionsRef.current.timeLimitSeconds && typedTextRef.current.length >= targetText.length) {
+        const now = Date.now();
+        endTimeRef.current = now;
+        setEndTime(now);
       }
     }
-  }, [typedText.length, targetText, startTime, timeLimitSeconds]);
+  }, [targetText]);
 
   // Real-time ticker to force re-renders for the timer
   const [tick, setTick] = useState(0);
@@ -89,22 +147,58 @@ export const useTypingEngine = (targetText: string, timeLimitSeconds: number | n
     ? ((endTime || Date.now()) - startTime) / 60000 
     : 0;
   
-  // WPM Formula: (Correct Characters / 5) / Time Elapsed in Minutes
-  // We count only characters typed up to the currently typed length
+  let correctWords = 0;
+  let incorrectWords = 0;
+  let errorRate = 0;
   let correctChars = 0;
-  for (let i = 0; i < typedText.length; i++) {
-    if (typedText[i] === targetText[i]) {
-      correctChars++;
+  
+  if (typedText.length > 0) {
+    const targetWords = targetText.split(' ');
+    const typedWords = typedText.split(' ');
+
+    for (let i = 0; i < typedWords.length; i++) {
+      if (targetWords[i] === undefined) {
+         incorrectWords++;
+         continue;
+      }
+      
+      // Değerlendirme: Sadece tamamlanmış kelimeler (boşluk bırakılmış) veya sınav bittiyse son kelime
+      if (i < typedWords.length - 1 || endTime) {
+        if (typedWords[i] === targetWords[i]) {
+          correctWords++;
+          correctChars += targetWords[i].length;
+          // Eğer cümlenin son kelimesi değilse boşluk için +1 ekle
+          if (i < targetWords.length - 1) {
+             correctChars += 1;
+          }
+        } else {
+          incorrectWords++;
+        }
+      } else {
+        // Şu an yazılan kelime için correctChars hesaplaması (hataya kadar)
+        const currentTyped = typedWords[i];
+        const currentTarget = targetWords[i];
+        for (let j = 0; j < currentTyped.length; j++) {
+           if (currentTyped[j] === currentTarget[j]) {
+              correctChars++;
+           } else {
+              break; // ilk hatada saymayı bırak
+           }
+        }
+      }
     }
+  }
+
+  if (targetText.length > 0) {
+    errorRate = Number(((errors / targetText.length) * 100).toFixed(2));
   }
 
   const wpm = timeElapsedInMinutes > 0 
     ? Math.round((correctChars / 5) / timeElapsedInMinutes) 
     : 0;
 
-  const totalTyped = typedText.length;
-  const accuracy = totalTyped > 0 
-    ? Math.round((correctChars / totalTyped) * 100) 
+  const accuracy = totalKeystrokes > 0 
+    ? Math.round(((totalKeystrokes - errors) / totalKeystrokes) * 100) 
     : 100;
 
   // Time elapsed in seconds
@@ -112,11 +206,15 @@ export const useTypingEngine = (targetText: string, timeLimitSeconds: number | n
 
   const reset = useCallback(() => {
     setTypedText("");
+    typedTextRef.current = "";
     setStartTime(null);
+    startTimeRef.current = null;
     setEndTime(null);
+    endTimeRef.current = null;
     setErrors(0);
     setBackspaceCount(0);
     setTotalKeystrokes(0);
+    heatmapStatsRef.current = {};
   }, []);
 
   return {
@@ -129,7 +227,11 @@ export const useTypingEngine = (targetText: string, timeLimitSeconds: number | n
       totalKeystrokes,
       timeElapsed: timeElapsedSeconds,
       isComplete: !!endTime,
-      isActive: !!startTime && !endTime
+      isActive: !!startTime && !endTime,
+      correctWords,
+      incorrectWords,
+      errorRate,
+      heatmapStats: { ...heatmapStatsRef.current }
     },
     handleKeyDown,
     reset

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { lessons, Lesson } from '../data/lessons';
 import { examText } from '../data/exams';
 import SeoArticle from '../components/SeoArticle';
@@ -10,7 +10,7 @@ import FingerMap from '../components/FingerMap';
 import UserDashboard from '../components/UserDashboard';
 import SeoLandingSection from '../components/SeoLandingSection';
 import { useLocalStorage } from '../utils/useLocalStorage';
-import { useEffect } from 'react';
+import AdBanner from '../components/AdBanner';
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -24,6 +24,20 @@ export default function Home() {
   const [selectedExamText, setSelectedExamText] = useState<any>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(180); // Default 3dk
   const [isExamSetupMode, setIsExamSetupMode] = useState(false);
+
+  // Dynamic Heatmap Logic
+  const [globalHeatmap] = useLocalStorage<Record<string, {hits: number, misses: number}>>("klavye_global_heatmap", {});
+  const weakKeys = useMemo(() => {
+    return Object.keys(globalHeatmap)
+      .map(char => {
+        const { hits, misses } = globalHeatmap[char];
+        return { char, total: hits + misses, acc: hits / (hits + misses) };
+      })
+      .filter(k => k.total >= 3 && k.acc < 0.90) // Under 90% accuracy
+      .sort((a, b) => a.acc - b.acc)
+      .slice(0, 6)
+      .map(k => k.char);
+  }, [globalHeatmap]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,7 +69,7 @@ export default function Home() {
         <header style={{ textAlign: 'center', marginBottom: '4.5rem' }} className="animate-fade-in-up">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem', borderRadius: '999px', background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.25)', marginBottom: '1.75rem' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-color)', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600', letterSpacing: '0.5px' }}>ÜCRETSIZ · REKLAMSIZ · KAYIT GEREKSİZ</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600', letterSpacing: '0.5px' }}>ÜCRETSİZ · KAYIT GEREKSİZ</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: '900', marginBottom: '1.25rem', color: 'var(--text-primary)', letterSpacing: '-2px', lineHeight: '1.05' }}>
             Türkiye'nin En Gelişmiş<br />
@@ -70,11 +84,16 @@ export default function Home() {
             <a href="#egitimler" style={{ padding: '0.85rem 2rem', background: 'var(--accent-color)', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '0.95rem', boxShadow: 'var(--shadow-accent)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               Eğitime Başla →
             </a>
-            <a href="/nasil-calisir" style={{ padding: '0.85rem 2rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', borderRadius: '10px', fontWeight: '600', fontSize: '0.95rem', border: '1px solid var(--border-medium)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <a href="/nasil-calisir" style={{ padding: '0.85rem 2rem', background: 'var(--bg-glass)', color: 'var(--text-primary)', borderRadius: '10px', fontWeight: '600', fontSize: '0.95rem', border: '1px solid var(--border-medium)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               Nasıl Çalışılır?
             </a>
           </div>
         </header>
+      )}
+
+      {/* Hero altı reklam */}
+      {!activeLesson && !isExamMode && !isExamSetupMode && (
+        <AdBanner slot="6280424775" format="horizontal" />
       )}
 
       <UserDashboard />
@@ -84,7 +103,7 @@ export default function Home() {
           
           {/* Klavye Seçici */}
           <div id="egitimler" style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'inline-flex', background: 'var(--bg-glass)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border-subtle)' }}>
               {(['F', 'Q'] as const).map(type => (
                 <button
                   key={type}
@@ -127,7 +146,7 @@ export default function Home() {
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
                     <span className="badge badge-blue">{lesson.keyboardType} KLAVYE</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--bg-glass)', padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
                       #{idx + 1}
                     </span>
                   </div>
@@ -165,6 +184,64 @@ export default function Home() {
                 </div>
               );
             })}
+
+            {weakKeys.length > 0 && (
+              <div
+                style={{
+                  padding: '2rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(202, 138, 4, 0.04))',
+                  border: '1px solid rgba(234, 179, 8, 0.25)',
+                  borderRadius: 'var(--radius-lg)',
+                  transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
+                }}
+                onClick={() => {
+                  let charsToTrain = [...weakKeys];
+                  // Eğer çok az hata harfi varsa, temel harflerle destekle
+                  if (charsToTrain.length < 5) {
+                     const fillers = keyboardType === 'F' ? ['A', 'E', 'K', 'T', 'İ'] : ['A', 'S', 'D', 'E', 'R'];
+                     charsToTrain = Array.from(new Set([...charsToTrain, ...fillers]));
+                  }
+                  setActiveLesson({
+                    id: 'dynamic-weak',
+                    slug: 'zayif-harf-antrenmani',
+                    title: 'Zayıf Harf Antrenmanı',
+                    keyboardType: keyboardType,
+                    allowedCharacters: charsToTrain,
+                    wordCount: 20,
+                    targetWpm: 20,
+                    targetAccuracy: 95,
+                    difficulty: 'intermediate',
+                    seoContent: 'En çok hata yaptığınız karakterlere dayalı olarak tamamen size özel üretilmiş dinamik düzeltme antrenmanıdır.'
+                  });
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2), 0 0 20px rgba(234, 179, 8, 0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.25)';
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                  <span className="badge" style={{background: 'rgba(234,179,8,0.15)', color: '#eab308'}}>ANALİZ • YAPAY ZEKA</span>
+                  <span style={{ fontSize: '1.25rem' }}>🔥</span>
+                </div>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '0.6rem', color: '#eab308', lineHeight: '1.3' }}>
+                  Zayıf Harfleri Çalış
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', flex: 1 }}>
+                  Isı haritanız incelendi. <strong style={{color: 'var(--text-primary)'}}>{weakKeys.join(', ')}</strong> tuşlarında çok hata yapıyorsunuz. Sadece bu tuşlara özel antrenman yapın.
+                </p>
+              </div>
+            )}
 
             {/* Katiplik Sınavı Kartı */}
             <div
@@ -217,6 +294,9 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Ders kartları altı reklam */}
+          <AdBanner slot="6280424775" format="horizontal" />
+
           <SeoLandingSection />
         </div>
       ) : isExamSetupMode ? (
@@ -227,7 +307,7 @@ export default function Home() {
             style={{
               background: 'transparent',
               color: 'var(--text-secondary)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--border-medium)',
               padding: '0.5rem 1.25rem',
               borderRadius: '8px',
               cursor: 'pointer',
@@ -250,7 +330,7 @@ export default function Home() {
               margin: '0 auto 1.5rem',
               fontSize: '2rem'
             }}>⚖️</div>
-            <h2 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#fff', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>
+            <h2 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>
               Katiplik Sınavı
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
@@ -276,9 +356,9 @@ export default function Home() {
                       padding: '1.25rem 0.5rem',
                       borderRadius: '12px',
                       cursor: 'pointer',
-                      background: isSelected ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `2px solid ${isSelected ? 'var(--error)' : 'rgba(255,255,255,0.08)'}`,
-                      color: isSelected ? '#fff' : 'var(--text-secondary)',
+                      background: isSelected ? 'var(--error-bg)' : 'var(--bg-glass)',
+                      border: `2px solid ${isSelected ? 'var(--error)' : 'var(--border-subtle)'}`,
+                      color: isSelected ? 'var(--error)' : 'var(--text-secondary)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -288,7 +368,7 @@ export default function Home() {
                     }}
                   >
                     <span style={{ fontSize: '1.75rem', fontWeight: '800', lineHeight: 1 }}>{label}</span>
-                    <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)' }}>{sublabel}</span>
+                    <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: isSelected ? 'var(--error)' : 'var(--text-muted)' }}>{sublabel}</span>
                   </button>
                 );
               })}
@@ -363,7 +443,23 @@ export default function Home() {
             title={selectedExamText.title} 
             content={selectedDuration ? `Bu sınav ${selectedDuration / 60} dakika sürmektedir. Hazır olduğunuzda ilk tuşa basarak başlayın.` : 'Bu sınav sınırsız sürelidir; metin bittiğinde otomatik olarak sonlanacaktır. Hazır olduğunuzda başlayın.'} 
           />
-          <ExamEngine targetText={selectedExamText.content} timeLimitSeconds={selectedDuration} />
+          <ExamEngine 
+            examId={selectedExamText.id} 
+            targetText={selectedExamText.content} 
+            timeLimitSeconds={selectedDuration} 
+            keyboardType={keyboardType} 
+            onRestart={() => {
+              if (examTexts.length > 1) {
+                let randomText = examTexts[Math.floor(Math.random() * examTexts.length)];
+                while (randomText.id === selectedExamText.id) {
+                  randomText = examTexts[Math.floor(Math.random() * examTexts.length)];
+                }
+                setSelectedExamText(randomText);
+              }
+            }}
+          />
+          {/* Sınav sonrası reklam */}
+          <AdBanner slot="3909035000" format="rectangle" />
         </div>
       ) : activeLesson ? (
         <div className="animate-fade-in">
@@ -420,6 +516,8 @@ export default function Home() {
             keyboardType={activeLesson.keyboardType}
             onNextLesson={hasNextLesson ? handleNextLesson : undefined}
           />
+          {/* Ders sonrası reklam */}
+          <AdBanner slot="6280424775" format="horizontal" />
         </div>
       ) : null}
     </main>

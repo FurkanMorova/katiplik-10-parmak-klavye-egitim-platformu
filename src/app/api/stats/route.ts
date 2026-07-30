@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { lessonId, wpm, errors, timeSeconds, accuracy } = await req.json();
+    const { lessonId, wpm, errors, timeSeconds, accuracy, correctWords, incorrectWords, errorRate } = await req.json();
 
     if (!lessonId || typeof wpm !== 'number' || typeof errors !== 'number') {
       return NextResponse.json({ error: 'Eksik veri' }, { status: 400 });
@@ -28,7 +28,10 @@ export async function POST(req: NextRequest) {
         wpm,
         errors,
         timeSeconds: timeSeconds || 0,
-        accuracy: accuracy || 0
+        accuracy: accuracy || 0,
+        correctWords: correctWords || 0,
+        incorrectWords: incorrectWords || 0,
+        errorRate: errorRate || 0
       }
     });
 

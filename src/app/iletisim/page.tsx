@@ -12,9 +12,9 @@ export default function Iletisim() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
           
           <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#fff' }}>İletişim Bilgileri</h2>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>İletişim Bilgileri</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--text-secondary)' }}>
-              <p><strong>E-Posta:</strong> iletisim@10parmakakademi.com</p>
+              <p><strong>E-Posta:</strong> info@furkanmorova.com</p>
               <p><strong>Eğitmen:</strong> M. Furkan Morova</p>
               <p><strong>Akademi:</strong> Başarısoft Bilgi Teknolojileri Akademisi</p>
             </div>
@@ -28,7 +28,7 @@ export default function Iletisim() {
                 borderRadius: '8px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 background: 'rgba(0,0,0,0.2)',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 fontSize: '1rem'
               }} />
             </div>
@@ -40,7 +40,7 @@ export default function Iletisim() {
                 borderRadius: '8px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 background: 'rgba(0,0,0,0.2)',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 fontSize: '1rem'
               }} />
             </div>
@@ -52,7 +52,7 @@ export default function Iletisim() {
                 borderRadius: '8px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 background: 'rgba(0,0,0,0.2)',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 fontSize: '1rem',
                 resize: 'vertical'
               }}></textarea>

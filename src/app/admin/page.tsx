@@ -121,7 +121,7 @@ export default function AdminDashboard() {
         
         {/* Öğrenci Ekleme Formu */}
         <div className="glass-panel" style={{ padding: '2rem', height: 'fit-content' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#fff' }}>Yeni Öğrenci Ekle</h2>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Yeni Öğrenci Ekle</h2>
           <form onSubmit={handleCreateStudent} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <input type="text" placeholder="Ad" value={firstName} onChange={e => setFirstName(e.target.value)} required style={inputStyle} />
             <input type="text" placeholder="Soyad" value={lastName} onChange={e => setLastName(e.target.value)} required style={inputStyle} />
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
             <button type="submit" style={{
               padding: '1rem',
               background: 'var(--accent-color)',
-              color: '#fff',
+              color: 'var(--text-primary)',
               border: 'none',
               borderRadius: '8px',
               fontWeight: 'bold',
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
 
         {/* Öğrenci Listesi ve İstatistikleri */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#fff' }}>Kayıtlı Öğrenciler ve İstatistikler</h2>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Kayıtlı Öğrenciler ve İstatistikler</h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {students.length === 0 ? (
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
               students.map(st => (
                 <div key={st.id} style={{ 
                   background: 'rgba(59, 130, 246, 0.05)', 
-                  border: '1px solid rgba(255,255,255,0.05)', 
+                  border: '1px solid rgba(0,0,0,0.05)', 
                   padding: '1.5rem', 
                   borderRadius: '12px' 
                 }}>
@@ -161,10 +161,10 @@ export default function AdminDashboard() {
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Katılım: {new Date(st.createdAt).toLocaleDateString('tr-TR')}</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '1rem', marginBottom: '1.5rem' }}>
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>TOPLAM TEKRAR</div>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff' }}>{st.stats.totalAttempts}</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{st.stats.totalAttempts}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ORT. HIZ (DBK)</div>
@@ -176,22 +176,39 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ORT. SÜRE</div>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff' }}>{st.stats.avgTime} sn</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{st.stats.avgTime} sn</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '1rem', marginBottom: '1.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ORT. DOĞRU KELİME</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--success)' }}>{st.stats.avgCorrectWords}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ORT. YANLIŞ KELİME</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--error)' }}>{st.stats.avgIncorrectWords}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ORT. HATA ORANI</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--error)' }}>%{st.stats.avgErrorRate}</div>
                     </div>
                   </div>
 
                   {/* Ders Bazlı Detaylar */}
                   {st.perLessonStats && st.perLessonStats.length > 0 && (
                     <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '1rem' }}>
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>Ders Bazlı Detaylar</h4>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.75rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.5rem' }}>Ders Bazlı Detaylar</h4>
                       <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', fontSize: '0.85rem', color: 'var(--text-secondary)', borderCollapse: 'collapse' }}>
                           <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <tr style={{ textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
                               <th style={{ padding: '0.5rem' }}>Ders Adı</th>
                               <th style={{ padding: '0.5rem' }}>Tekrar</th>
                               <th style={{ padding: '0.5rem' }}>Ort. Hız</th>
-                              <th style={{ padding: '0.5rem' }}>Ort. Hata</th>
+                              <th style={{ padding: '0.5rem' }}>Ort. Hata V.</th>
+                              <th style={{ padding: '0.5rem' }}>Ort. D. Kel</th>
+                              <th style={{ padding: '0.5rem' }}>Ort. Y. Kel</th>
+                              <th style={{ padding: '0.5rem' }}>Hata Oranı</th>
                               <th style={{ padding: '0.5rem' }}>Ort. Süre</th>
                             </tr>
                           </thead>
@@ -206,6 +223,9 @@ export default function AdminDashboard() {
                                   <td style={{ padding: '0.5rem' }}>{pl.count}</td>
                                   <td style={{ padding: '0.5rem', color: 'var(--accent-color)' }}>{pl.avgWpm} DBK</td>
                                   <td style={{ padding: '0.5rem', color: 'var(--error)' }}>{pl.avgErrors}</td>
+                                  <td style={{ padding: '0.5rem', color: 'var(--success)' }}>{pl.avgCorrectWords}</td>
+                                  <td style={{ padding: '0.5rem', color: 'var(--error)' }}>{pl.avgIncorrectWords}</td>
+                                  <td style={{ padding: '0.5rem', color: 'var(--error)' }}>%{pl.avgErrorRate}</td>
                                   <td style={{ padding: '0.5rem' }}>{pl.avgTime} sn</td>
                                 </tr>
                               );
@@ -230,7 +250,7 @@ export default function AdminDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
           
           <div className="glass-panel" style={{ padding: '2rem', height: 'fit-content' }}>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: '#fff' }}>Yeni Metin Ekle</h3>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Yeni Metin Ekle</h3>
             <form onSubmit={handleCreateExam} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <input 
                 type="text" 
@@ -251,7 +271,7 @@ export default function AdminDashboard() {
               <button type="submit" style={{
                 padding: '1rem',
                 background: 'var(--error)',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: 'bold',
@@ -262,7 +282,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: '#fff' }}>Kayıtlı Sınav Metinleri</h3>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Kayıtlı Sınav Metinleri</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {exams.length === 0 ? (
                 <p style={{ color: 'var(--text-secondary)' }}>Henüz sınav metni eklenmemiş.</p>
@@ -278,7 +298,7 @@ export default function AdminDashboard() {
                     alignItems: 'center'
                   }}>
                     <div>
-                      <h4 style={{ color: '#fff', margin: '0 0 0.5rem 0' }}>{ex.title}</h4>
+                      <h4 style={{ color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>{ex.title}</h4>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
                         {ex.content.substring(0, 100)}...
                       </p>
@@ -302,7 +322,7 @@ export default function AdminDashboard() {
 const inputStyle = {
   padding: '0.8rem',
   borderRadius: '8px',
-  border: '1px solid rgba(255,255,255,0.1)',
+  border: '1px solid rgba(0,0,0,0.1)',
   background: 'rgba(0,0,0,0.2)',
   color: '#fff',
   fontSize: '1rem'

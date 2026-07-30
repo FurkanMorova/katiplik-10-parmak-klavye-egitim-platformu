@@ -7,6 +7,9 @@ interface StatsHeaderProps {
   timeElapsed: number;
   timeLimit?: number | null;
   hideStats?: boolean;
+  correctWords?: number;
+  incorrectWords?: number;
+  errorRate?: number;
 }
 
 export default function StatsHeader({
@@ -16,6 +19,9 @@ export default function StatsHeader({
   timeElapsed,
   timeLimit,
   hideStats = false,
+  correctWords,
+  incorrectWords,
+  errorRate
 }: StatsHeaderProps) {
   
   const formatTime = (seconds: number) => {
@@ -42,6 +48,14 @@ export default function StatsHeader({
             {showStats ? `${accuracy}%` : '-'}
           </span>
         </div>
+        {typeof errorRate !== 'undefined' && (
+          <div className={styles.statBox}>
+            <span className={styles.label}>Hata Oranı</span>
+            <span className={`${styles.value} ${errorRate > 0 && showStats ? styles.error : ''}`}>
+              {showStats ? `%${errorRate}` : '-'}
+            </span>
+          </div>
+        )}
       </div>
       
       <div className={styles.statBox}>
@@ -51,11 +65,27 @@ export default function StatsHeader({
       
       <div className={styles.statGroup}>
         <div className={styles.statBox}>
-          <span className={styles.label}>Hata</span>
+          <span className={styles.label}>Hatalı Basış</span>
           <span className={`${styles.value} ${errors > 0 && showStats ? styles.error : ''}`}>
             {showStats ? errors : '-'}
           </span>
         </div>
+        {typeof incorrectWords !== 'undefined' && (
+          <div className={styles.statBox}>
+            <span className={styles.label}>Yanlış Kel.</span>
+            <span className={`${styles.value} ${incorrectWords > 0 && showStats ? styles.error : ''}`}>
+              {showStats ? incorrectWords : '-'}
+            </span>
+          </div>
+        )}
+        {typeof correctWords !== 'undefined' && (
+          <div className={styles.statBox}>
+            <span className={styles.label}>Doğru Kel.</span>
+            <span className={`${styles.value} ${correctWords > 0 && showStats ? styles.success : ''}`}>
+              {showStats ? correctWords : '-'}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

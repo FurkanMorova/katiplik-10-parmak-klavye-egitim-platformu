@@ -35,7 +35,7 @@ export default function UserDashboard() {
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '0.25rem' }}>{item.label}</div>
               <div style={{ fontSize: '1.5rem', fontWeight: '800', color: item.color }}>{item.value}</div>
             </div>
-            {i < arr.length - 1 && <div style={{ width: '1px', background: 'rgba(255,255,255,0.08)', height: '36px' }} />}
+            {i < arr.length - 1 && <div style={{ width: '1px', background: 'var(--border-subtle)', height: '36px' }} />}
           </div>
         ))}
       </div>
