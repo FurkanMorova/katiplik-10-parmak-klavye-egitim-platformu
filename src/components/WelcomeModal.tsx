@@ -8,14 +8,14 @@ export default function WelcomeModal() {
 
   useEffect(() => {
     setMounted(true);
-    const hasSeen = localStorage.getItem("hasSeenWelcomeModal");
+    const hasSeen = localStorage.getItem("hasSeenWelcomeModal_v2");
     if (!hasSeen) {
       setIsOpen(true);
     }
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem("hasSeenWelcomeModal", "true");
+    localStorage.setItem("hasSeenWelcomeModal_v2", "true");
     setIsOpen(false);
   };
 
