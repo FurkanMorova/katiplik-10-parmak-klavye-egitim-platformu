@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import WelcomeModal from "../components/WelcomeModal";
 import CookieBanner from "../components/CookieBanner";
 import Script from "next/script";
 
@@ -67,7 +66,6 @@ export default function RootLayout({
             gtag('config', 'G-5CWSB7Y8XE');
           `}
         </Script>
-        <WelcomeModal />
         <CookieBanner />
         <Header />
         <div className="app-layout animate-fade-in" style={{ flex: 1 }}>
