@@ -15,6 +15,7 @@ model User {
   firstName String
   lastName  String
   role      Role     @default(STUDENT)
+  isExternal Boolean  @default(false)
   createdAt DateTime @default(now())
 
   // İlişkiler

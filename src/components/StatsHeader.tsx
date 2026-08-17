@@ -10,6 +10,7 @@ interface StatsHeaderProps {
   correctWords?: number;
   incorrectWords?: number;
   errorRate?: number;
+  totalKeystrokes?: number;
 }
 
 export default function StatsHeader({
@@ -21,7 +22,8 @@ export default function StatsHeader({
   hideStats = false,
   correctWords,
   incorrectWords,
-  errorRate
+  errorRate,
+  totalKeystrokes
 }: StatsHeaderProps) {
   
   const formatTime = (seconds: number) => {
@@ -70,21 +72,32 @@ export default function StatsHeader({
             {showStats ? errors : '-'}
           </span>
         </div>
-        {typeof incorrectWords !== 'undefined' && (
+        {typeof totalKeystrokes !== 'undefined' ? (
           <div className={styles.statBox}>
-            <span className={styles.label}>Yanlış Kel.</span>
-            <span className={`${styles.value} ${incorrectWords > 0 && showStats ? styles.error : ''}`}>
-              {showStats ? incorrectWords : '-'}
+            <span className={styles.label}>Toplam Basış</span>
+            <span className={`${styles.value} ${totalKeystrokes > 0 && showStats ? styles.highlight : ''}`}>
+              {showStats ? totalKeystrokes : '-'}
             </span>
           </div>
-        )}
-        {typeof correctWords !== 'undefined' && (
-          <div className={styles.statBox}>
-            <span className={styles.label}>Doğru Kel.</span>
-            <span className={`${styles.value} ${correctWords > 0 && showStats ? styles.success : ''}`}>
-              {showStats ? correctWords : '-'}
-            </span>
-          </div>
+        ) : (
+          <>
+            {typeof incorrectWords !== 'undefined' && (
+              <div className={styles.statBox}>
+                <span className={styles.label}>Yanlış Kel.</span>
+                <span className={`${styles.value} ${incorrectWords > 0 && showStats ? styles.error : ''}`}>
+                  {showStats ? incorrectWords : '-'}
+                </span>
+              </div>
+            )}
+            {typeof correctWords !== 'undefined' && (
+              <div className={styles.statBox}>
+                <span className={styles.label}>Doğru Kel.</span>
+                <span className={`${styles.value} ${correctWords > 0 && showStats ? styles.success : ''}`}>
+                  {showStats ? correctWords : '-'}
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -43,22 +43,52 @@ export default function Login() {
   };
 
   return (
-    <main className="container" style={{ padding: '4rem 1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-      <div className="glass-panel" style={{ padding: '3rem', borderRadius: '24px', width: '100%', maxWidth: '400px' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--accent-color)', textAlign: 'center' }}>Giriş Yap</h1>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>
-          Öğrenci veya Yönetici hesabınızla giriş yapın.
-        </p>
+    <main className="container" style={{ padding: '4rem 1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '75vh' }}>
+      <div className="glass-panel" style={{ padding: '3rem 2.5rem', borderRadius: '24px', width: '100%', maxWidth: '420px', background: 'var(--bg-secondary)', border: '1px solid var(--border-medium)', boxShadow: 'var(--shadow-lg)' }}>
+        
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: 'var(--accent-light)',
+            color: 'var(--accent-color)',
+            fontSize: '1.75rem',
+            marginBottom: '1rem',
+            border: '1px solid var(--border-subtle)'
+          }}>
+            🔐
+          </div>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+            Giriş Yap
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+            Öğrenci veya Yönetici hesabınızla giriş yapın.
+          </p>
+        </div>
 
         {error && (
-          <div style={{ background: 'var(--error-bg)', color: 'var(--error)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <div style={{
+            background: 'var(--error-bg)',
+            border: '1px solid var(--error)',
+            color: 'var(--error)',
+            padding: '0.85rem 1rem',
+            borderRadius: '10px',
+            marginBottom: '1.5rem',
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            textAlign: 'center'
+          }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="username" style={{ color: 'var(--text-primary)', fontWeight: '500' }}>Kullanıcı Adı</label>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label htmlFor="username" style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.88rem' }}>Kullanıcı Adı</label>
             <input 
               type="text" 
               id="username" 
@@ -66,19 +96,12 @@ export default function Login() {
               onChange={e => setUsername(e.target.value)}
               placeholder="kullanici.adi" 
               required
-              style={{
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border-medium)',
-                background: 'var(--bg-glass)',
-                color: 'var(--text-primary)',
-                fontSize: '1rem'
-              }} 
+              style={inputStyle} 
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="password" style={{ color: 'var(--text-primary)', fontWeight: '500' }}>Şifre</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label htmlFor="password" style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.88rem' }}>Şifre</label>
             <input 
               type="password" 
               id="password" 
@@ -86,34 +109,48 @@ export default function Login() {
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••" 
               required
-              style={{
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border-medium)',
-                background: 'var(--bg-glass)',
-                color: 'var(--text-primary)',
-                fontSize: '1rem'
-              }} 
+              style={inputStyle} 
             />
           </div>
 
           <button type="submit" disabled={loading} style={{
-            padding: '1rem',
+            padding: '0.95rem',
             background: 'var(--accent-color)',
-            color: '#fff',
+            color: '#121214',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
+            borderRadius: '10px',
+            fontSize: '1.05rem',
+            fontWeight: '700',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
-            boxShadow: '0 4px 15px var(--accent-glow)',
-            marginTop: '1rem'
+            boxShadow: 'var(--shadow-accent)',
+            marginTop: '0.5rem',
+            transition: 'all 0.2s',
           }}>
             {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
           </button>
         </form>
+
+        <div style={{ marginTop: '1.75rem', textAlign: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
+            Hesabınız yok mu?{' '}
+          </span>
+          <a href="/register" style={{ color: 'var(--accent-color)', fontWeight: '700', fontSize: '0.92rem' }}>
+            Hemen Kayıt Ol
+          </a>
+        </div>
+
       </div>
     </main>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  padding: '0.85rem 1rem',
+  borderRadius: '10px',
+  border: '1px solid var(--border-medium)',
+  background: 'var(--bg-glass)',
+  color: 'var(--text-primary)',
+  fontSize: '0.95rem',
+  outline: 'none',
+};

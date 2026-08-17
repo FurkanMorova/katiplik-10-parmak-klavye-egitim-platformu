@@ -9,7 +9,10 @@ import { generateRandomText } from '../utils/generateRandomText';
 import { useLocalStorage } from '../utils/useLocalStorage';
 import { incrementGlobalStats } from '../lib/firebaseStats';
 import { useAudioFeedback } from '../utils/useAudioFeedback';
+import { useGamification } from '../utils/useGamification';
 import HeatmapKeyboard from './HeatmapKeyboard';
+import MotivationToast from './MotivationToast';
+import AchievementToast from './AchievementToast';
 
 interface TypingEngineProps {
   lessonId: string;
@@ -50,7 +53,12 @@ export default function TypingEngine({
 
   // Audio Feature
   const [audioEnabled, setAudioEnabled] = useLocalStorage('klavye_audio_pref', true);
-  const { playHit, playError } = useAudioFeedback();
+  const { playHit, playError, playCompletion, playLevelUp, playAchievement } = useAudioFeedback();
+
+  // Gamification
+  const gamification = useGamification();
+  const [gamResult, setGamResult] = useState<{ xpEarned: number; stars: number; newlyUnlocked: string[]; leveledUp: boolean; challengeJustCompleted: boolean } | null>(null);
+  const [showAchievementToast, setShowAchievementToast] = useState<string[]>([]);
 
   const { state, handleKeyDown, reset } = useTypingEngine(targetText, {
     timeLimitSeconds,
@@ -136,13 +144,30 @@ export default function TypingEngine({
         });
         return next;
       });
+
+      // Gamification
+      const result = gamification.completeLesson(lessonId, state.wpm, state.accuracy, state.timeElapsed, targetWpm);
+      setGamResult(result);
+
+      // Play sounds
+      if (audioEnabled) {
+        playCompletion();
+        if (result.leveledUp) setTimeout(() => playLevelUp(), 600);
+        if (result.newlyUnlocked.length > 0) {
+          setTimeout(() => {
+            playAchievement();
+            setShowAchievementToast(result.newlyUnlocked);
+          }, 800);
+        }
+      }
     }
-  }, [state.isComplete, state.wpm, state.errors, state.timeElapsed, state.accuracy, state.correctWords, state.incorrectWords, state.errorRate, lessonId, state.heatmapStats, setStats, setLessonStats, setGlobalHeatmap]);
+  }, [state.isComplete, state.wpm, state.errors, state.timeElapsed, state.accuracy, state.correctWords, state.incorrectWords, state.errorRate, lessonId, state.heatmapStats, setStats, setLessonStats, setGlobalHeatmap, targetWpm, gamification, audioEnabled, playCompletion, playLevelUp, playAchievement]);
 
   const expectedChar = targetText[state.typedText.length] || null;
 
   const handleRestart = () => {
     scoreSavedRef.current = false;
+    setGamResult(null);
     setTargetText(generateRandomText(allowedCharacters, wordCount, 5, customWords));
     reset();
     setTimeout(() => {
@@ -160,7 +185,7 @@ export default function TypingEngine({
         errors={state.errors}
         timeElapsed={state.timeElapsed}
         timeLimit={timeLimitSeconds}
-        correctWords={state.correctWords}
+        totalKeystrokes={state.totalKeystrokes}
         errorRate={state.errorRate}
       />
 
@@ -180,18 +205,16 @@ export default function TypingEngine({
       {state.isComplete ? (
         <div className="glass-panel" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center' }}>
           <h2 style={{ marginBottom: '1rem', color: 'var(--success)' }}>Egzersiz Tamamlandı!</h2>
-          <p style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>
-            Hızınız: <strong title="Dakika Başına Kelime">{state.wpm} DBK</strong>
+          <p style={{ marginBottom: '1rem', fontSize: '1.2rem', lineHeight: '1.8' }}>
+            Hızınız: <strong title="Dakika Başına Kelime" style={{ color: 'var(--accent-color)' }}>{state.wpm} DBK</strong>
             <br />
             Doğruluk Oranı: <strong>{state.accuracy}%</strong>
             <br />
             Toplam Basış: <strong>{state.totalKeystrokes}</strong>
             <br />
-            Hatalı Basış: <strong>{state.errors}</strong>
+            Hatalı Basış: <strong style={{ color: 'var(--error)' }}>{state.errors}</strong>
             <br />
-            Doğru Kelime: <strong style={{color: 'var(--success)'}}>{state.correctWords}</strong>
-            <br />
-            Hata Oranı: <strong style={{color: 'var(--error)'}}>%{state.errorRate}</strong>
+            Hata Oranı: <strong style={{ color: 'var(--error)' }}>%{state.errorRate}</strong>
           </p>
 
           <div style={{ marginBottom: '2rem' }}>
@@ -199,9 +222,36 @@ export default function TypingEngine({
           </div>
 
           {state.wpm >= targetWpm ? (
-            <p style={{ color: 'var(--success)', marginBottom: '1.5rem', fontWeight: 'bold' }}>🎉 Hedefinize ulaştınız!</p>
+            <p style={{ color: 'var(--success)', marginBottom: '1rem', fontWeight: 'bold' }}>🎉 Hedefinize ulaştınız!</p>
           ) : (
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Hedefinize ({targetWpm} DBK) ulaşmak için biraz daha pratik yapın.</p>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Hedefinize ({targetWpm} DBK) ulaşmak için biraz daha pratik yapın.</p>
+          )}
+
+          {/* Gamification Results */}
+          {gamResult && (
+            <MotivationToast
+              wpm={state.wpm}
+              accuracy={state.accuracy}
+              xpEarned={gamResult.xpEarned}
+              stars={gamResult.stars}
+              dailyHistory={gamification.data.dailyHistory}
+              totalLessonsCompleted={gamification.data.totalLessonsCompleted}
+            />
+          )}
+
+          {gamResult?.leveledUp && (
+            <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '12px', background: 'rgba(79,142,247,0.08)', border: '1px solid rgba(79,142,247,0.2)', textAlign: 'center', animation: 'levelUpGlow 1.5s ease-in-out' }}>
+              <span style={{ fontSize: '1.5rem' }}>🎉</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: '800', color: gamification.levelInfo.color, marginLeft: '0.5rem' }}>
+                Seviye {gamification.levelInfo.level} — {gamification.levelInfo.title}!
+              </span>
+            </div>
+          )}
+
+          {gamResult?.challengeJustCompleted && (
+            <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderRadius: '10px', background: 'rgba(34,211,165,0.08)', border: '1px solid rgba(34,211,165,0.2)', textAlign: 'center', fontSize: '0.9rem', color: 'var(--success)', fontWeight: '600' }}>
+              ✅ Günlük meydan okuma tamamlandı!
+            </div>
           )}
           
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
@@ -243,6 +293,14 @@ export default function TypingEngine({
         </div>
       ) : (
         <VirtualKeyboard expectedChar={expectedChar} keyboardType={keyboardType} />
+      )}
+
+      {/* Achievement Toast Overlay */}
+      {showAchievementToast.length > 0 && (
+        <AchievementToast
+          unlockedIds={showAchievementToast}
+          onDismiss={() => setShowAchievementToast([])}
+        />
       )}
     </div>
   );

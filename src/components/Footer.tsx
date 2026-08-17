@@ -36,8 +36,8 @@ export default function Footer() {
           <div>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', marginBottom: '1.25rem' }}>
               <div style={{
-                background: 'linear-gradient(135deg, #4f8ef7, #7c55f7)',
-                color: '#fff',
+                background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                color: '#121214',
                 width: '40px',
                 height: '40px',
                 borderRadius: '10px',
@@ -45,8 +45,8 @@ export default function Footer() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: '900',
-                fontSize: '1rem',
-                boxShadow: '0 4px 15px rgba(79, 142, 247, 0.4)',
+                fontSize: '1.05rem',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
                 flexShrink: 0,
               }}>10</div>
               <div>

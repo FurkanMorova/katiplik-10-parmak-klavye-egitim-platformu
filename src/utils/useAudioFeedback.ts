@@ -86,13 +86,86 @@ export const useAudioFeedback = () => {
     osc.stop(ctx.currentTime + 0.05);
   }, [getAudioContext]);
 
+  // Level up fanfare - ascending arpeggio
+  const playLevelUp = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+    });
+  }, [getAudioContext]);
+
+  // Achievement chime - sparkle sound
+  const playAchievement = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    [880, 1320, 1760].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.08 + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.08);
+      osc.stop(ctx.currentTime + i * 0.08 + 0.25);
+    });
+  }, [getAudioContext]);
+
+  // Completion jingle - success chord
+  const playCompletion = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    [440, 554, 659].forEach(freq => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    });
+  }, [getAudioContext]);
+
+  // New record - triumphant chord
+  const playNewRecord = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const chords = [[523, 659, 784], [587, 740, 880], [659, 831, 1047]];
+    chords.forEach((chord, ci) => {
+      chord.forEach(freq => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + ci * 0.2);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + ci * 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + ci * 0.2 + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + ci * 0.2);
+        osc.stop(ctx.currentTime + ci * 0.2 + 0.4);
+      });
+    });
+  }, [getAudioContext]);
+
   // Metronome control
   const startMetronome = useCallback((bpm: number) => {
     if (metronomeIntervalRef.current) clearInterval(metronomeIntervalRef.current);
-    
-    // Convert BPM to ms interval
     const intervalMs = 60000 / bpm;
-    
     metronomeIntervalRef.current = setInterval(() => {
       playMetronomeTick();
     }, intervalMs);
@@ -114,5 +187,5 @@ export const useAudioFeedback = () => {
     };
   }, []);
 
-  return { playHit, playError, startMetronome, stopMetronome };
+  return { playHit, playError, playLevelUp, playAchievement, playCompletion, playNewRecord, startMetronome, stopMetronome };
 };

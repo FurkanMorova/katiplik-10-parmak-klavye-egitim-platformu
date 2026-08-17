@@ -9,21 +9,40 @@ import ExamEngine from '../components/ExamEngine';
 import FingerMap from '../components/FingerMap';
 import UserDashboard from '../components/UserDashboard';
 import SeoLandingSection from '../components/SeoLandingSection';
+import HomeFaqSection from '../components/HomeFaqSection';
 import { useLocalStorage } from '../utils/useLocalStorage';
 import AdBanner from '../components/AdBanner';
+
+// Gamification imports
+import { useGamification } from '../utils/useGamification';
+import StreakBanner from '../components/StreakBanner';
+import DailyChallenge from '../components/DailyChallenge';
+import LearningPath from '../components/LearningPath';
+import AchievementsGallery from '../components/AchievementsGallery';
+import ProgressChart from '../components/ProgressChart';
+import Leaderboard from '../components/Leaderboard';
+import SpeedRace from '../components/SpeedRace';
+import CustomTextMode from '../components/CustomTextMode';
+import HeroLeaderboardPodium from '../components/HeroLeaderboardPodium';
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [isExamMode, setIsExamMode] = useState(false);
+  const [isSpeedRaceMode, setIsSpeedRaceMode] = useState(false);
+  const [isCustomTextMode, setIsCustomTextMode] = useState(false);
+  const [customText, setCustomText] = useState<string | null>(null);
   const [keyboardType, setKeyboardType] = useLocalStorage<'F' | 'Q'>('klavye_type_pref', 'F');
   const [lessonStats] = useLocalStorage<Record<string, any>>('klavye_lesson_stats', {});
 
   // Sınav seçim stateleri
   const [examTexts, setExamTexts] = useState<any[]>([]);
   const [selectedExamText, setSelectedExamText] = useState<any>(null);
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(180); // Default 3dk
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(180);
   const [isExamSetupMode, setIsExamSetupMode] = useState(false);
+
+  // Gamification
+  const gamification = useGamification();
 
   // Dynamic Heatmap Logic
   const [globalHeatmap] = useLocalStorage<Record<string, {hits: number, misses: number}>>("klavye_global_heatmap", {});
@@ -33,7 +52,7 @@ export default function Home() {
         const { hits, misses } = globalHeatmap[char];
         return { char, total: hits + misses, acc: hits / (hits + misses) };
       })
-      .filter(k => k.total >= 3 && k.acc < 0.90) // Under 90% accuracy
+      .filter(k => k.total >= 3 && k.acc < 0.90)
       .sort((a, b) => a.acc - b.acc)
       .slice(0, 6)
       .map(k => k.char);
@@ -59,47 +78,185 @@ export default function Home() {
     }
   };
 
+  const isInAnyMode = activeLesson || isExamMode || isExamSetupMode || isSpeedRaceMode || isCustomTextMode || customText;
+
   if (!isMounted) return null;
 
   return (
-    <main className="container" style={{ padding: '5rem 1.5rem 6rem' }}>
+    <main className="container" style={{ padding: '3.5rem 1.5rem 6rem' }}>
 
-      {/* Hero */}
-      {!activeLesson && !isExamMode && !isExamSetupMode && (
-        <header style={{ textAlign: 'center', marginBottom: '4.5rem' }} className="animate-fade-in-up">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem', borderRadius: '999px', background: 'rgba(79,142,247,0.1)', border: '1px solid rgba(79,142,247,0.25)', marginBottom: '1.75rem' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-color)', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: '600', letterSpacing: '0.5px' }}>ÜCRETSİZ · KAYIT GEREKSİZ</span>
+      {/* Dynamic Split Hero */}
+      {!isInAnyMode && (
+        <header style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center',
+          marginBottom: '4rem',
+        }} className="animate-fade-in-up">
+          
+          {/* Sol Kolon: Katiplik & On Parmak Başlık ve Aksiyonlar */}
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.4rem 1rem',
+              borderRadius: '999px',
+              background: 'var(--accent-light)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              marginBottom: '1.25rem'
+            }}>
+              <span style={{ fontSize: '1rem' }}>⚖️</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--accent-color)', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                KATİPLİK SINAVI & ON PARMAK EĞİTİMİ
+              </span>
+            </div>
+
+            <h1 style={{
+              fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)',
+              fontWeight: '900',
+              marginBottom: '1.25rem',
+              color: 'var(--text-primary)',
+              letterSpacing: '-1.5px',
+              lineHeight: '1.1'
+            }}>
+              Katiplik Sınavına Hazırlık ve{' '}
+              <span style={{
+                background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                On Parmak Klavye
+              </span>{' '}Çalışması
+            </h1>
+
+            <p style={{
+              color: 'var(--text-secondary)',
+              fontSize: '1.05rem',
+              lineHeight: '1.7',
+              marginBottom: '1.75rem',
+              maxWidth: '540px'
+            }}>
+              <strong>3 dakikada 90 kelime barajını aşın.</strong> Bilimsel F ve Q klavye dersleri, Adalet Bakanlığı sınav metinleri, zayıf tuş analizi ve canlı liderlik sıralamasıyla kas hafızanızı hızlandırın.
+            </p>
+
+            {/* Aksiyon Butonları */}
+            <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+              <a
+                href="#egitimler"
+                style={{
+                  padding: '0.85rem 1.75rem',
+                  background: 'var(--accent-color)',
+                  color: '#121214',
+                  borderRadius: '10px',
+                  fontWeight: '800',
+                  fontSize: '0.95rem',
+                  boxShadow: 'var(--shadow-accent)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Eğitime Başla →
+              </a>
+
+              <button
+                onClick={() => {
+                  if (examTexts.length === 0) {
+                    alert('Sınav metinleri yükleniyor...');
+                    return;
+                  }
+                  setIsExamSetupMode(true);
+                }}
+                style={{
+                  padding: '0.85rem 1.5rem',
+                  background: 'var(--error-bg)',
+                  color: 'var(--error)',
+                  borderRadius: '10px',
+                  fontWeight: '700',
+                  fontSize: '0.95rem',
+                  border: '1px solid var(--error)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                ⚖️ 3 Dk Sınav Modu
+              </button>
+
+              <button
+                onClick={() => setIsSpeedRaceMode(true)}
+                style={{
+                  padding: '0.85rem 1.4rem',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '10px',
+                  fontWeight: '700',
+                  fontSize: '0.95rem',
+                  border: '1px solid var(--border-medium)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                ⚡ 60sn Hız Testi
+              </button>
+            </div>
+
+            {/* Özellik Rozetleri */}
+            <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                <span style={{ color: 'var(--success)' }}>✓</span> 3 Dk / 90 Kelime Simülasyonu
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                <span style={{ color: 'var(--accent-color)' }}>✓</span> F & Q Klavye Desteği
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                <span style={{ color: 'var(--success)' }}>✓</span> Tamamen Ücretsiz
+              </div>
+            </div>
           </div>
-          <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: '900', marginBottom: '1.25rem', color: 'var(--text-primary)', letterSpacing: '-2px', lineHeight: '1.05' }}>
-            Türkiye'nin En Gelişmiş<br />
-            <span style={{ background: 'linear-gradient(135deg, #4f8ef7, #7c55f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              10 Parmak Klavye
-            </span>{' '}Platformu
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.15rem', maxWidth: '650px', margin: '0 auto 2rem', lineHeight: '1.7' }}>
-            Bilimsel rastgele metin algoritması, Katiplik Sınavı simülasyonu ve gerçek zamanlı istatistiklerle hem F hem de Q klavye eğitimi alın. Kas hafızanızı kalıcı olarak geliştirin.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="#egitimler" style={{ padding: '0.85rem 2rem', background: 'var(--accent-color)', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '0.95rem', boxShadow: 'var(--shadow-accent)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              Eğitime Başla →
-            </a>
-            <a href="/nasil-calisir" style={{ padding: '0.85rem 2rem', background: 'var(--bg-glass)', color: 'var(--text-primary)', borderRadius: '10px', fontWeight: '600', fontSize: '0.95rem', border: '1px solid var(--border-medium)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              Nasıl Çalışılır?
-            </a>
+
+          {/* Sağ Kolon: Canlı Liderlik Kürsüsü (Podium) */}
+          <div>
+            <HeroLeaderboardPodium />
           </div>
+
         </header>
       )}
 
       {/* Hero altı reklam */}
-      {!activeLesson && !isExamMode && !isExamSetupMode && (
+      {!isInAnyMode && (
         <AdBanner slot="6280424775" format="horizontal" />
       )}
 
       <UserDashboard />
 
-      {!activeLesson && !isExamMode && !isExamSetupMode ? (
+      {!isInAnyMode ? (
         <div className="animate-fade-in">
+
+          {/* Streak Banner */}
+          <StreakBanner
+            streak={gamification.effectiveStreak}
+            longestStreak={gamification.data.longestStreak}
+          />
+
+          {/* Daily Challenge */}
+          <DailyChallenge
+            description={gamification.dailyChallenge.description}
+            target={gamification.dailyChallenge.target}
+            type={gamification.dailyChallenge.type}
+            completed={gamification.dailyChallenge.completed}
+            progress={gamification.dailyChallenge.progress}
+            xpReward={gamification.dailyChallenge.xpReward}
+          />
           
           {/* Klavye Seçici */}
           <div id="egitimler" style={{ marginBottom: '2.5rem' }}>
@@ -131,77 +288,25 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))' }}>
-            {filteredLessons.map((lesson, idx) => {
-              const stats = lessonStats[lesson.id];
-              return (
-                <div
-                  key={lesson.id}
-                  className="glass-panel lesson-card"
-                  style={{ padding: '2rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}
-                  onClick={() => setActiveLesson(lesson)}
-                >
-                  {/* Arka plan nüans */}
-                  <div style={{ position: 'absolute', top: 0, right: 0, width: '100px', height: '100px', background: 'radial-gradient(circle, rgba(79,142,247,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-                    <span className="badge badge-blue">{lesson.keyboardType} KLAVYE</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--bg-glass)', padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                      #{idx + 1}
-                    </span>
-                  </div>
-                  <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '0.6rem', color: 'var(--text-primary)', lineHeight: '1.3' }}>
-                    {lesson.title}
-                  </h2>
-                  <div style={{ marginTop: 'auto', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                      <span style={{ color: 'var(--accent-color)', fontWeight: '700' }}>🎯 Hedef:</span>
-                      <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{lesson.targetWpm} DBK</span>
-                    </div>
-                    {stats && stats.playCount > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--success)' }}>
-                        <span>⚡</span>
-                        <strong>{stats.highestWpm}</strong>
-                      </div>
-                    )}
-                  </div>
+          {/* Learning Path (replaces old grid) */}
+          <LearningPath
+            lessons={filteredLessons}
+            lessonStars={gamification.data.lessonStars}
+            isLessonUnlocked={gamification.isLessonUnlocked}
+            onSelectLesson={setActiveLesson}
+            lessonStats={lessonStats}
+          />
 
-                  {stats && stats.playCount > 0 && (
-                    <div style={{
-                      marginTop: '1rem',
-                      paddingTop: '1rem',
-                      borderTop: '1px solid var(--border-subtle)',
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, 1fr)',
-                      gap: '0.5rem',
-                      fontSize: '0.8rem',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      <div>Tekrar: <strong style={{ color: 'var(--text-primary)' }}>{stats.playCount}×</strong></div>
-                      <div>Ort. Hata: <strong style={{ color: 'var(--error)' }}>{(stats.totalErrors / stats.playCount).toFixed(1)}</strong></div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          {/* Extra Mode Cards */}
+          <div style={{ display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', marginTop: '2rem', marginBottom: '2rem' }}>
 
+            {/* Zayıf Harfler */}
             {weakKeys.length > 0 && (
               <div
-                style={{
-                  padding: '2rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(202, 138, 4, 0.04))',
-                  border: '1px solid rgba(234, 179, 8, 0.25)',
-                  borderRadius: 'var(--radius-lg)',
-                  transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
-                }}
+                className="glass-panel lesson-card"
+                style={{ padding: '2rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(202, 138, 4, 0.04))', border: '1px solid rgba(234, 179, 8, 0.25)' }}
                 onClick={() => {
                   let charsToTrain = [...weakKeys];
-                  // Eğer çok az hata harfi varsa, temel harflerle destekle
                   if (charsToTrain.length < 5) {
                      const fillers = keyboardType === 'F' ? ['A', 'E', 'K', 'T', 'İ'] : ['A', 'S', 'D', 'E', 'R'];
                      charsToTrain = Array.from(new Set([...charsToTrain, ...fillers]));
@@ -219,16 +324,6 @@ export default function Home() {
                     seoContent: 'En çok hata yaptığınız karakterlere dayalı olarak tamamen size özel üretilmiş dinamik düzeltme antrenmanıdır.'
                   });
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2), 0 0 20px rgba(234, 179, 8, 0.15)';
-                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.25)';
-                }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
                   <span className="badge" style={{background: 'rgba(234,179,8,0.15)', color: '#eab308'}}>ANALİZ • YAPAY ZEKA</span>
@@ -238,41 +333,61 @@ export default function Home() {
                   Zayıf Harfleri Çalış
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', flex: 1 }}>
-                  Isı haritanız incelendi. <strong style={{color: 'var(--text-primary)'}}>{weakKeys.join(', ')}</strong> tuşlarında çok hata yapıyorsunuz. Sadece bu tuşlara özel antrenman yapın.
+                  Isı haritanız incelendi. <strong style={{color: 'var(--text-primary)'}}>{weakKeys.join(', ')}</strong> tuşlarında çok hata yapıyorsunuz.
                 </p>
               </div>
             )}
 
-            {/* Katiplik Sınavı Kartı */}
+            {/* Hızlı Yarış */}
             <div
-              style={{
-                padding: '2rem',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                overflow: 'hidden',
-                background: 'linear-gradient(135deg, rgba(240,82,82,0.08), rgba(220,38,38,0.04))',
-                border: '1px solid rgba(240,82,82,0.25)',
-                borderRadius: 'var(--radius-lg)',
-                transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
-              }}
+              className="glass-panel lesson-card"
+              style={{ padding: '2rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(124, 85, 247, 0.08), rgba(79, 142, 247, 0.04))', border: '1px solid rgba(124, 85, 247, 0.25)' }}
+              onClick={() => setIsSpeedRaceMode(true)}
+            >
+              <div style={{ position: 'absolute', top: 0, right: 0, width: '120px', height: '120px', background: 'radial-gradient(circle, rgba(124,85,247,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <span className="badge" style={{background: 'rgba(124,85,247,0.15)', color: '#a855f7'}}>YARIŞ MODU</span>
+                <span style={{ fontSize: '1.25rem' }}>⚡</span>
+              </div>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '0.6rem', color: '#a855f7', lineHeight: '1.3' }}>
+                Hızlı Yarış (60s)
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', flex: 1 }}>
+                60 saniyede ne kadar hızlı yazabilirsin? Rekorunu kır!
+              </p>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(124,85,247,0.15)', fontSize: '0.8rem', color: '#a855f7', fontWeight: '600' }}>
+                ⚡ Rekorunuz: {(() => { try { return JSON.parse(localStorage.getItem('klavye_speedrace_best') || '0'); } catch { return 0; } })()} DBK
+              </div>
+            </div>
+
+            {/* Özel Metin */}
+            <div
+              className="glass-panel lesson-card"
+              style={{ padding: '2rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(34, 211, 165, 0.06), rgba(16, 185, 129, 0.04))', border: '1px solid rgba(34, 211, 165, 0.2)' }}
+              onClick={() => setIsCustomTextMode(true)}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <span className="badge badge-green">SERBEST MOD</span>
+                <span style={{ fontSize: '1.25rem' }}>📝</span>
+              </div>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '0.6rem', color: 'var(--success)', lineHeight: '1.3' }}>
+                Kendi Metnini Yaz
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', flex: 1 }}>
+                Kendi metnini yapıştır ve üzerinde pratik yap.
+              </p>
+            </div>
+
+            {/* Katiplik Sınavı */}
+            <div
+              className="glass-panel lesson-card"
+              style={{ padding: '2rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(240,82,82,0.08), rgba(220,38,38,0.04))', border: '1px solid rgba(240,82,82,0.25)' }}
               onClick={() => {
                 if (examTexts.length === 0) {
                   alert('Henüz sınav metni eklenmemiş. Lütfen önce admin panelinden metin ekleyin.');
                   return;
                 }
                 setIsExamSetupMode(true);
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(240,82,82,0.3)';
-                e.currentTarget.style.borderColor = 'var(--error)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'rgba(240,82,82,0.25)';
               }}
             >
               <div style={{ position: 'absolute', top: 0, right: 0, width: '120px', height: '120px', background: 'radial-gradient(circle, rgba(240,82,82,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -284,7 +399,7 @@ export default function Home() {
                 Katiplik Sınavı
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', flex: 1 }}>
-                Gerçek sınav metinleriyle pratik yapın. Süreyi kendiniz belirleyin.
+                Gerçek sınav metinleriyle pratik yapın.
               </p>
               <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(240,82,82,0.15)', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {['1 dk', '3 dk', '5 dk', '∞'].map(d => (
@@ -297,39 +412,61 @@ export default function Home() {
           {/* Ders kartları altı reklam */}
           <AdBanner slot="6280424775" format="horizontal" />
 
+          {/* Progress Chart */}
+          <ProgressChart dailyHistory={gamification.data.dailyHistory} />
+
+          {/* Achievements Gallery */}
+          <AchievementsGallery
+            unlockedIds={gamification.data.unlockedAchievements.map(a => a.id)}
+          />
+
+          {/* Leaderboard */}
+          <Leaderboard />
+
           <SeoLandingSection />
+          <HomeFaqSection />
         </div>
+
+      ) : isSpeedRaceMode ? (
+        <SpeedRace
+          keyboardType={keyboardType}
+          onBack={() => setIsSpeedRaceMode(false)}
+        />
+
+      ) : isCustomTextMode && !customText ? (
+        <CustomTextMode
+          onStart={(text) => {
+            setCustomText(text);
+            setIsCustomTextMode(false);
+          }}
+          onBack={() => setIsCustomTextMode(false)}
+        />
+
+      ) : customText ? (
+        <div className="animate-fade-in">
+          <button
+            onClick={() => { setCustomText(null); setIsCustomTextMode(false); }}
+            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--text-muted)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >← Ana Ekrana Dön</button>
+          <TypingEngine
+            lessonId="custom-text"
+            allowedCharacters={[]} 
+            customWords={customText.split(/\s+/).filter(w => w.length > 0)}
+            wordCount={customText.split(/\s+/).filter(w => w.length > 0).length}
+            targetWpm={20}
+            keyboardType={keyboardType}
+          />
+        </div>
+
       ) : isExamSetupMode ? (
         <div className="animate-fade-in" style={{ maxWidth: '700px', margin: '0 auto' }}>
-          {/* Geri Butonu */}
           <button
             onClick={() => setIsExamSetupMode(false)}
-            style={{
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-medium)',
-              padding: '0.5rem 1.25rem',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginBottom: '2.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.95rem',
-              transition: 'all 0.2s',
-            }}
+            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', padding: '0.5rem 1.25rem', borderRadius: '8px', cursor: 'pointer', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', transition: 'all 0.2s' }}
           >← Ana Sayfaya Dön</button>
 
-          {/* Başlık */}
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{
-              width: '72px', height: '72px', borderRadius: '50%',
-              background: 'rgba(239,68,68,0.15)',
-              border: '2px solid rgba(239,68,68,0.4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 1.5rem',
-              fontSize: '2rem'
-            }}>⚖️</div>
+            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(239,68,68,0.15)', border: '2px solid rgba(239,68,68,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>⚖️</div>
             <h2 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>
               Katiplik Sınavı
             </h2>
@@ -338,7 +475,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Süre Seçim Kartları */}
           <div style={{ marginBottom: '2.5rem' }}>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>
               Sınav Süresi
@@ -353,16 +489,11 @@ export default function Home() {
                     key={seconds === null ? 'null' : seconds}
                     onClick={() => setSelectedDuration(seconds)}
                     style={{
-                      padding: '1.25rem 0.5rem',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
+                      padding: '1.25rem 0.5rem', borderRadius: '12px', cursor: 'pointer',
                       background: isSelected ? 'var(--error-bg)' : 'var(--bg-glass)',
                       border: `2px solid ${isSelected ? 'var(--error)' : 'var(--border-subtle)'}`,
                       color: isSelected ? 'var(--error)' : 'var(--text-secondary)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.25rem',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem',
                       transition: 'all 0.2s',
                       boxShadow: isSelected ? '0 0 20px rgba(239,68,68,0.2)' : 'none',
                     }}
@@ -375,24 +506,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Rastgele Metin Notu */}
-          <div style={{
-            marginBottom: '2.5rem',
-            padding: '1.25rem 1.5rem',
-            borderRadius: '12px',
-            background: 'rgba(59,130,246,0.05)',
-            border: '1px solid rgba(59,130,246,0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
+          <div style={{ marginBottom: '2.5rem', padding: '1.25rem 1.5rem', borderRadius: '12px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '1.5rem' }}>🎲</span>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
               Sınava başladığınızda sistem kayıtlı metinler arasından <strong style={{ color: 'var(--text-primary)' }}>rastgele</strong> bir metin seçecektir.
             </p>
           </div>
 
-          {/* Başla Butonu */}
           <button
             onClick={() => {
               const randomText = examTexts[Math.floor(Math.random() * examTexts.length)];
@@ -401,18 +521,11 @@ export default function Home() {
               setIsExamMode(true);
             }}
             style={{
-              width: '100%',
-              padding: '1.25rem',
-              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '14px',
-              fontSize: '1.2rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              boxShadow: '0 8px 30px rgba(239,68,68,0.35)',
-              letterSpacing: '0.5px',
-              transition: 'all 0.2s',
+              width: '100%', padding: '1.25rem',
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff',
+              border: 'none', borderRadius: '14px', fontSize: '1.2rem', fontWeight: '700',
+              cursor: 'pointer', boxShadow: '0 8px 30px rgba(239,68,68,0.35)',
+              letterSpacing: '0.5px', transition: 'all 0.2s',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 40px rgba(239,68,68,0.5)'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgba(239,68,68,0.35)'; }}
@@ -420,25 +533,13 @@ export default function Home() {
             Sınava Başla →
           </button>
         </div>
+
       ) : isExamMode && selectedExamText ? (
         <div className="animate-fade-in">
           <button 
             onClick={() => setIsExamMode(false)}
-            style={{
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--text-muted)',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            ← Ana Ekrana Dön
-          </button>
+            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--text-muted)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >← Ana Ekrana Dön</button>
           <SeoArticle 
             title={selectedExamText.title} 
             content={selectedDuration ? `Bu sınav ${selectedDuration / 60} dakika sürmektedir. Hazır olduğunuzda ilk tuşa basarak başlayın.` : 'Bu sınav sınırsız sürelidir; metin bittiğinde otomatik olarak sonlanacaktır. Hazır olduğunuzda başlayın.'} 
@@ -458,30 +559,17 @@ export default function Home() {
               }
             }}
           />
-          {/* Sınav sonrası reklam */}
           <AdBanner slot="3909035000" format="rectangle" />
         </div>
+
       ) : activeLesson ? (
         <div className="animate-fade-in">
           <button 
             onClick={() => setActiveLesson(null)}
-            style={{
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--text-muted)',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            ← Ders Seçimine Dön
-          </button>
+            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--text-muted)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >← Ders Seçimine Dön</button>
 
-          {/* Parmak Haritası — sayfanın en başında, açık */}
+          {/* Parmak Haritası */}
           <div style={{ marginBottom: '1.5rem' }}>
             <FingerMap compact defaultExpanded defaultKb={activeLesson.keyboardType} />
           </div>
@@ -516,7 +604,6 @@ export default function Home() {
             keyboardType={activeLesson.keyboardType}
             onNextLesson={hasNextLesson ? handleNextLesson : undefined}
           />
-          {/* Ders sonrası reklam */}
           <AdBanner slot="6280424775" format="horizontal" />
         </div>
       ) : null}

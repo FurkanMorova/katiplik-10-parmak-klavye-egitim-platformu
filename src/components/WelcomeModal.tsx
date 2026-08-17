@@ -8,14 +8,14 @@ export default function WelcomeModal() {
 
   useEffect(() => {
     setMounted(true);
-    const hasSeen = localStorage.getItem("hasSeenWelcomeModal_v2");
+    const hasSeen = localStorage.getItem("hasSeenWelcomeModal");
     if (!hasSeen) {
       setIsOpen(true);
     }
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem("hasSeenWelcomeModal_v2", "true");
+    localStorage.setItem("hasSeenWelcomeModal", "true");
     setIsOpen(false);
   };
 
@@ -29,14 +29,14 @@ export default function WelcomeModal() {
 
         {/* Trophy Icon */}
         <div style={iconContainerStyle}>
-          <svg 
-            width="32" 
-            height="32" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="var(--accent-color)" 
-            strokeWidth="2.2" 
-            strokeLinecap="round" 
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--accent-color)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -79,7 +79,7 @@ export default function WelcomeModal() {
             e.currentTarget.style.background = "linear-gradient(135deg, #3b82f6, #1d4ed8)";
           }}
         >
-          Teşekkür Ederiz
+          Teşekkür Ederim
         </button>
       </div>
     </div>

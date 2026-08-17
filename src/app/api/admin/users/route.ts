@@ -73,9 +73,11 @@ export async function GET(req: NextRequest) {
         firstName: st.firstName,
         lastName: st.lastName,
         username: st.username,
+        isExternal: st.isExternal ?? false,
         createdAt: st.createdAt,
         stats: {
           totalAttempts: totalResults,
+          bestWpm: st.results.reduce((max, r) => Math.max(max, r.wpm), 0),
           avgWpm: totalResults > 0 ? Math.round(totalWpm / totalResults) : 0,
           avgErrors: totalResults > 0 ? (totalErrors / totalResults).toFixed(1) : 0,
           avgTime: totalResults > 0 ? (totalTime / totalResults).toFixed(1) : 0,
@@ -110,7 +112,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Tüm alanlar zorunludur' }, { status: 400 });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { username } });
+    const trimmedUsername = username.trim().toLowerCase();
+    const existingUser = await prisma.user.findUnique({ where: { username: trimmedUsername } });
     if (existingUser) {
       return NextResponse.json({ error: 'Bu kullanıcı adı zaten mevcut' }, { status: 400 });
     }
@@ -119,16 +122,59 @@ export async function POST(req: NextRequest) {
 
     const newUser = await prisma.user.create({
       data: {
-        username,
+        username: trimmedUsername,
         password: hashedPassword,
-        firstName,
-        lastName,
-        role: 'STUDENT'
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        role: 'STUDENT',
+        isExternal: false,
       }
     });
 
     return NextResponse.json({ message: 'Öğrenci oluşturuldu', user: newUser });
   } catch (err) {
     return NextResponse.json({ error: 'Öğrenci oluşturulurken hata oluştu' }, { status: 500 });
+  }
+}
+
+// Delete student (and all associated results)
+export async function DELETE(req: NextRequest) {
+  try {
+    const token = req.cookies.get('parmak_token')?.value;
+    if (!token) return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 });
+
+    const payload = await verifyToken(token);
+    if (!payload || payload.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Erişim reddedildi' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    let userId = searchParams.get('id');
+
+    if (!userId) {
+      try {
+        const body = await req.json();
+        userId = body.id;
+      } catch (e) {}
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Kullanıcı ID zorunludur' }, { status: 400 });
+    }
+
+    // Önce kullanıcının tüm çalışma kayıtlarını sil (Foreign Key & Temizlik)
+    await prisma.lessonResult.deleteMany({
+      where: { userId }
+    });
+
+    // Kullanıcıyı sil
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    return NextResponse.json({ message: 'Öğrenci ve tüm pratik verileri başarıyla silindi' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    return NextResponse.json({ error: 'Kullanıcı silinirken hata oluştu' }, { status: 500 });
   }
 }

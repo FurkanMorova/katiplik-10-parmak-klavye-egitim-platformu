@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import styles from './TextDisplay.module.css';
 
 interface TextDisplayProps {
   targetText: string;
@@ -22,8 +21,8 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
     if (!activeChar) return;
 
     // Satır yüksekliğini ölç
-    const firstSpan = innerRef.current.querySelector('span') as HTMLElement;
-    const lineHeight = firstSpan ? firstSpan.getBoundingClientRect().height * 1.6 : 42;
+    const firstWord = innerRef.current.querySelector('span') as HTMLElement;
+    const lineHeight = firstWord ? firstWord.getBoundingClientRect().height * 1.5 : 44;
     const twoLineThreshold = lineHeight * 2;
 
     const charOffset = activeChar.offsetTop;
@@ -61,8 +60,9 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
         padding: '1.5rem',
         outline: 'none',
         background: 'var(--bg-glass)',
-        border: '1px solid var(--border-subtle)',
+        border: '1px solid var(--border-medium)',
         borderRadius: '14px',
+        userSelect: 'none',
       }}
     >
       {/* Kaydırılan iç katman */}
@@ -70,10 +70,10 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
         ref={innerRef}
         style={{
           transform: `translateY(-${translateY}px)`,
-          transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           fontFamily: 'var(--font-mono), monospace',
           fontSize: '1.4rem',
-          lineHeight: '1.6',
+          lineHeight: '1.7',
           letterSpacing: '0.5px',
           wordBreak: 'break-word',
           whiteSpace: 'pre-wrap',
@@ -83,25 +83,35 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
         {targetWords.map((word, wordIndex) => {
           const isLastWord = wordIndex === targetWords.length - 1;
           return (
-            <span key={`word-${wordIndex}`} style={{ display: 'inline', marginRight: '0.35em' }}>
+            <span
+              key={`word-${wordIndex}`}
+              style={{
+                display: 'inline-block',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {word.split('').map((char) => {
                 const idx = globalCharIndex++;
                 const typedChar = typedChars[idx];
                 const isActiveCursor = idx === typedText.length;
 
-                // displayOnly modunda sade görünüm: renklendirme ve imleç yok
                 let color = 'var(--text-secondary)';
                 let bg = 'transparent';
                 let decorationLine: 'none' | 'underline' = 'none';
 
                 if (!displayOnly) {
                   if (typedChar !== undefined) {
-                    color = typedChar === char ? 'var(--text-primary)' : 'var(--error)';
+                    if (typedChar === char) {
+                      color = 'var(--text-primary)';
+                    } else {
+                      color = 'var(--error)';
+                      bg = 'var(--error-bg)';
+                      decorationLine = 'underline';
+                    }
                   } else if (isActiveCursor) {
-                    color = 'var(--text-primary)';
-                    bg = 'var(--accent-light)';
+                    color = '#121214';
+                    bg = 'var(--accent-color)';
                   }
-                  if (typedChar !== undefined && typedChar !== char) decorationLine = 'underline';
                 }
 
                 return (
@@ -114,6 +124,7 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
                       borderRadius: '2px',
                       textDecorationLine: decorationLine,
                       textDecorationColor: 'var(--error)',
+                      transition: 'background-color 0.08s',
                     }}
                   >
                     {char}
@@ -128,21 +139,35 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
 
                 let color = 'var(--text-secondary)';
                 let bg = 'transparent';
+                let decorationLine: 'none' | 'underline' = 'none';
 
                 if (!displayOnly) {
                   if (typedSpace !== undefined) {
-                    color = typedSpace === ' ' ? 'var(--text-primary)' : 'var(--error)';
+                    if (typedSpace === ' ') {
+                      color = 'var(--text-primary)';
+                    } else {
+                      color = 'var(--error)';
+                      bg = 'var(--error-bg)';
+                      decorationLine = 'underline';
+                    }
                   } else if (isActiveCursor) {
-                    color = 'var(--text-primary)';
-                    bg = 'var(--accent-light)';
+                    color = '#121214';
+                    bg = 'var(--accent-color)';
                   }
                 }
 
                 return (
                   <span
-                    key={`char-${spaceIdx}`}
+                    key={`space-${spaceIdx}`}
                     data-active={isActiveCursor ? 'true' : undefined}
-                    style={{ color, background: bg, borderRadius: '2px' }}
+                    style={{
+                      color,
+                      background: bg,
+                      borderRadius: '2px',
+                      textDecorationLine: decorationLine,
+                      textDecorationColor: 'var(--error)',
+                      transition: 'background-color 0.08s',
+                    }}
                   >
                     {'\u00A0'}
                   </span>
@@ -155,4 +180,3 @@ export default function TextDisplay({ targetText, typedText, isActive = true, di
     </div>
   );
 }
-

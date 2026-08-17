@@ -26,12 +26,18 @@ export default function AdBanner({
 
   useEffect(() => {
     if (adPushed.current) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      adPushed.current = true;
-    } catch (err) {
-      console.warn('AdSense error:', err);
-    }
+    const timer = setTimeout(() => {
+      try {
+        if (adRef.current && !adRef.current.getAttribute('data-adsbygoogle-status')) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          adPushed.current = true;
+        }
+      } catch (err) {
+        // Dev ortamında AdSense uyarılarını sessize al
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (

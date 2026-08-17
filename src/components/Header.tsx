@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import { useGamification } from '../utils/useGamification';
 
 export default function Header() {
   const [authState, setAuthState] = useState<{ authenticated: boolean; user?: any }>({ authenticated: false });
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { effectiveStreak, levelInfo, data } = useGamification();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -50,8 +52,8 @@ export default function Header() {
       <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #4f8ef7, #7c55f7)',
-            color: '#fff',
+            background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+            color: '#121214',
             width: '38px',
             height: '38px',
             borderRadius: '10px',
@@ -59,8 +61,8 @@ export default function Header() {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '900',
-            fontSize: '1rem',
-            boxShadow: '0 4px 15px rgba(79, 142, 247, 0.4)',
+            fontSize: '1.05rem',
+            boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
             flexShrink: 0,
           }}>10</div>
           <div>
@@ -92,6 +94,25 @@ export default function Header() {
             onMouseEnter={e => { if (pathname !== '/blog') e.currentTarget.style.color = 'var(--text-primary)'; }}
             onMouseLeave={e => { if (pathname !== '/blog') e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >Blog</Link>
+
+          {/* Gamification badges */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            {effectiveStreak > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '700', color: '#f97316' }} title={`${effectiveStreak} günlük seri`}>
+                <span style={{ animation: 'fireFlicker 1.5s ease-in-out infinite' }}>🔥</span>
+                {effectiveStreak}
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }} title={`Seviye ${levelInfo.level} — ${levelInfo.title} (${data.totalXP} XP)`}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.78rem', fontWeight: '700', color: levelInfo.color }}>
+                <span>{levelInfo.emoji}</span>
+                <span>Lv.{levelInfo.level}</span>
+              </div>
+              <div className="xp-bar-container" style={{ width: '42px' }}>
+                <div className="xp-bar-fill" style={{ width: `${levelInfo.progress}%` }} />
+              </div>
+            </div>
+          </div>
 
           <ThemeToggle />
 
@@ -135,19 +156,36 @@ export default function Header() {
               >Çıkış</button>
             </div>
           ) : (
-            <Link href="/login" style={{
-              background: 'rgba(79, 142, 247, 0.1)',
-              color: 'var(--accent-color)',
-              border: '1px solid rgba(79, 142, 247, 0.3)',
-              padding: '0.5rem 1.1rem',
-              borderRadius: '9px',
-              fontWeight: '600',
-              fontSize: '0.9rem',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-color)'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(79, 142, 247, 0.1)'; e.currentTarget.style.color = 'var(--accent-color)'; }}
-            >Giriş Yap</Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Link href="/login" style={{
+                background: 'var(--bg-glass)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-medium)',
+                padding: '0.45rem 0.95rem',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '0.88rem',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-glass-hover)'; e.currentTarget.style.borderColor = 'var(--accent-color)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
+              >Giriş Yap</Link>
+              
+              <Link href="/register" style={{
+                background: 'var(--accent-color)',
+                color: '#121214',
+                border: 'none',
+                padding: '0.45rem 1rem',
+                borderRadius: '8px',
+                fontWeight: '700',
+                fontSize: '0.88rem',
+                boxShadow: 'var(--shadow-accent)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+              >Kayıt Ol</Link>
+            </div>
           )}
         </nav>
       </div>

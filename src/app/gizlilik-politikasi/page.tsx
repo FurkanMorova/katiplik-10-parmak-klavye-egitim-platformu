@@ -1,37 +1,56 @@
-"use client";
+import Link from 'next/link';
+
+export const metadata = {
+  title: 'Gizlilik Politikası ve KVKK Aydınlatma Metni | ParmakAkademi',
+  description: 'ParmakAkademi gizlilik politikası, çerezler, Google AdSense üçüncü taraf reklamları ve kişisel verilerin korunması hakkında bilgilendirme.',
+};
 
 export default function GizlilikPolitikasi() {
   return (
-    <main className="container" style={{ padding: '4rem 1.5rem', maxWidth: '800px' }}>
-      <div className="glass-panel" style={{ padding: '3rem', borderRadius: '24px' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: 'var(--accent-color)' }}>Gizlilik Politikası</h1>
+    <main className="container" style={{ padding: '4rem 1.5rem 8rem', maxWidth: '840px' }}>
+      <div className="glass-panel" style={{ padding: '3rem 2.5rem', borderRadius: '24px', background: 'var(--bg-secondary)', border: '1px solid var(--border-medium)' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1rem', color: 'var(--text-primary)', letterSpacing: '-1px' }}>
+          Gizlilik Politikası ve KVKK Aydınlatma Metni
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+          Son Güncelleme: {new Date().toLocaleDateString('tr-TR')}
+        </p>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', lineHeight: '1.85', color: 'var(--text-secondary)', fontSize: '1.02rem' }}>
           <p>
-            Son Güncelleme: {new Date().toLocaleDateString('tr-TR')}
+            <strong>ParmakAkademi</strong> ("Platform") olarak kullanıcılarımızın gizliliğine, kişisel verilerinin güvenliğine ve şeffaflık ilkelerine en yüksek düzeyde riayet etmekteyiz. 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve Avrupa Birliği Genel Veri Koruma Yönetmeliği ("GDPR") kapsamında hazırlanan bu metin, platformumuzu ziyaret ettiğinizde verilerinizin nasıl toplandığını, işlendiğini ve korunduğunu açıklamaktadır.
           </p>
 
-          <p>
-            10 Parmak Akademi olarak kullanıcılarımızın gizliliğine ve kişisel verilerinin korunmasına büyük önem veriyoruz. Bu metin, web sitemizi ("Platform") ziyaret ettiğinizde verilerinizin nasıl toplandığı, kullanıldığı ve korunduğu hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.
-          </p>
-
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '1rem' }}>1. Hangi Verileri Topluyoruz?</h2>
-          <p>
-            Platformumuz, kullanıcılarına üye girişi gerektirmeyen tamamen anonim bir deneyim sunar. Sistem, öğrenme istatistiklerinizi ve ilerlemenizi tarayıcınızın <strong>Local Storage (Yerel Depolama)</strong> üzerine kaydeder. Sunucularımızda size ait kişisel hiçbir tanımlayıcı bilgi (ad, soyad, e-posta, hız istatistikleri) <u>tutulmamaktadır</u>.
-          </p>
-
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '1rem' }}>2. Çerezler (Cookies) ve Üçüncü Taraf İş Ortakları</h2>
-          <p>
-            Platformumuz daha iyi bir kullanıcı deneyimi sunabilmek, site trafiğini analiz etmek ve uygun reklamları gösterebilmek amacıyla çerezleri (cookies) ve benzeri teknolojileri (örneğin Google AdSense ve Google Analytics) kullanabilir.
-          </p>
-          <ul style={{ paddingLeft: '1.5rem' }}>
-            <li>Google dahil olmak üzere üçüncü taraf sağlayıcılar, kullanıcıların web sitemize veya diğer web sitelerine yaptıkları önceki ziyaretleri temel alan reklamlar yayınlamak için çerezleri kullanmaktadır.</li>
-            <li>Google'ın reklam çerezlerini kullanması, Google ve iş ortaklarının kullanıcılarınıza sitemiz ve/veya internetteki diğer sitelere yaptıkları ziyaretleri temel alan reklamlar sunmasına olanak tanır.</li>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', fontWeight: '800' }}>1. Toplanan Veriler ve İşlenme Amaçları</h2>
+          <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <li><strong>Hesap Bilgileri:</strong> Platforma kayıt olduğunuzda belirlediğiniz ad, soyad, kullanıcı adı ve güvenli tek yönlü şifreleme (bcrypt) ile saklanan parola verileriniz profilinizi oluşturmak amacıyla işlenir.</li>
+            <li><strong>Eğitim ve Performans Verileri:</strong> Tamamladığınız dersler, sınav sonuçları, dakika başına kelime (DBK) hızınız, doğruluk oranınız ve hata istatistikleriniz kişisel gelişiminizi takip edebilmeniz ve isteğe bağlı liderlik sıralamasına katılabilmeniz için kaydedilir.</li>
+            <li><strong>Teknik Veriler:</strong> Sitemizi ziyaret ettiğinizde IP adresi, tarayıcı türü, cihaz işletim sistemi ve sayfa görüntüleme süreleri gibi anonim analitik veriler platform performansını iyileştirmek için toplanır.</li>
           </ul>
 
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '1rem' }}>3. İletişim Bilgileri</h2>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', fontWeight: '800' }}>2. Çerezler (Cookies) ve Üçüncü Taraf Reklam Ortakları</h2>
           <p>
-            Bu Gizlilik Politikası hakkında sorularınız, endişeleriniz veya şikayetleriniz olması durumunda bize <strong>iletisim@10parmakakademi.com</strong> adresinden e-posta yoluyla veya <a href="/iletisim" style={{ color: 'var(--accent-color)' }}>İletişim sayfasındaki</a> form aracılığıyla ulaşabilirsiniz.
+            Platformumuz, kullanıcı deneyimini zenginleştirmek, site trafiğini analiz etmek ve ilgi alanlarınıza uygun kişiselleştirilmiş içerik ile reklam sunabilmek amacıyla çerezler (cookies) kullanmaktadır.
+          </p>
+          <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <li><strong>Google AdSense & DoubleClick Çerezleri:</strong> Google dahil olmak üzere üçüncü taraf sağlayıcılar, kullanıcıların platformumuza veya internetteki diğer web sitelerine daha önce yaptıkları ziyaretleri temel alan reklamlar yayınlamak için çerezleri (DART çerezi) kullanır.</li>
+            <li>Kullanıcılar, <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}>Google Reklam Ayarları</a> sayfasını ziyaret ederek kişiselleştirilmiş reklamcılık için kullanılan çerezleri devre dışı bırakabilirler.</li>
+            <li><strong>Google Analytics:</strong> Ziyaretçi davranışlarını anlamak ve site hızını optimize etmek amacıyla anonim istatistiksel çerezler kullanılmaktadır.</li>
+          </ul>
+
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', fontWeight: '800' }}>3. Verilerin Korunması ve Güvenliği</h2>
+          <p>
+            Kullanıcı parolaları veritabanımızda asla düz metin olarak tutulmaz; endüstri standardı <strong>bcrypt hashing</strong> algoritmalarıyla korunur. Tüm veri iletimi güvenli SSL/TLS (HTTPS) şifreleme protokolü üzerinden gerçekleştirilir. Verileriniz hiçbir koşulda üçüncü şahıslara satılmaz veya ticari amaçla devredilmez.
+          </p>
+
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', fontWeight: '800' }}>4. Kullanıcı Hakları (KVKK Madde 11)</h2>
+          <p>
+            KVKK kapsamında her kullanıcı; kendisiyle ilgili kişisel veri işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, verilerin düzeltilmesini veya silinmesini isteme hakkına sahiptir. Hesabınızı ve tüm verilerinizi dilediğiniz an sildirebilirsiniz.
+          </p>
+
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-primary)', fontWeight: '800' }}>5. İletişim</h2>
+          <p>
+            Gizlilik politikamız ve kişisel verilerinizle ilgili her türlü soru, görüş ve veri silme talebiniz için bizimle <Link href="/iletisim" style={{ color: 'var(--accent-color)', fontWeight: '700' }}>İletişim Sayfası</Link> üzerinden veya <strong>info@furkanmorova.com</strong> adresinden irtibata geçebilirsiniz.
           </p>
         </div>
       </div>
