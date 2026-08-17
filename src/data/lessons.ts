@@ -33,7 +33,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["u", "i", "e", "a"],
     wordCount: 50,
-    targetWpm: 15,
+    targetWpm: 20,
     targetAccuracy: 90
   },
   {
@@ -56,7 +56,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["k", "m", "l", "y", "ş"],
     wordCount: 50,
-    targetWpm: 15,
+    targetWpm: 20,
     targetAccuracy: 90
   },
   {
@@ -73,7 +73,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["u", "i", "e", "a", "k", "m", "l", "y", "ş"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -90,7 +90,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["u", "i", "e", "a", "ü", "t", "k", "m", "l", "y", "ş"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -107,7 +107,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["f", "g", "ğ", "ı", "o"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -124,7 +124,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["d", "r", "n", "h", "p"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -140,7 +140,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["f", "g", "ğ", "ı", "o", "d", "r", "n", "h", "p"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 26,
     targetAccuracy: 90
   },
   {
@@ -148,7 +148,7 @@ export const lessons: Lesson[] = [
     title: "Ders 8: Temel ve Üst Sıra Kelime Egzersizi",
     slug: "f-klavye-ders-8-temel-ust-kelimeler",
     seoContent: `
-      <h2>Ders 8: Anlamlı Kelimelerle Temel ve Üst Sıra Peşiştirmesi</h2>
+      <h2>Ders 8: Anlamlı Kelimelerle Temel ve Üst Sıra Pekiştirmesi</h2>
       <p>Şu ana kadar öğrendiğiniz temel ve üst sıra harfleriyle oluşturulmuş anlamlı Türkçe kelimelerle hız ve doğruluk çalışmaları yapacağız.</p>
       <p>Hatalı bastığınızda moralinizi bozmadan hemen doğru tuşu bulmaya çalışın. Klavyeye bakmak alışkanlığınızı köreltir, sadece ekrana odaklanın.</p>
       <p>Bu ders gerçek yazma hızınıza ulaşmanız için bir sıçrama tahtasıdır. Ürettiğimiz kelimeler tamamen Türkçede en sık karşınıza çıkacak sözcük öbeklerinden alındığı için, bu dersteki performansınız katiplik hızınıza veya standart ofis çalışma hızınıza en yakın durumu gösterir. Lütfen tam odak ile devam edin!</p>
@@ -158,7 +158,7 @@ export const lessons: Lesson[] = [
     allowedCharacters: ["u", "i", "e", "a", "ü", "t", "k", "m", "l", "y", "ş", "f", "g", "ğ", "ı", "o", "d", "r", "n", "h", "p"],
     customWords: ["defter", "kitap", "okul", "yarın", "telefon", "kedi", "dünya", "hayat", "güneş", "ay", "kum", "orman", "dağ", "armut", "elma", "nar", "portakal", "halı", "perde", "kapı", "kutu", "para", "adam", "kadın", "anne", "dede", "hala", "dayı", "yol", "tren", "gemi", "gel", "git", "al", "oku", "koş", "dur", "at", "tut", "kır", "yap"],
     wordCount: 60,
-    targetWpm: 25,
+    targetWpm: 30,
     targetAccuracy: 90
   },
   {
@@ -174,7 +174,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["j", "ö", "v", "c", "ç"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -190,7 +190,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["z", "s", "b"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -207,7 +207,7 @@ export const lessons: Lesson[] = [
     keyboardType: "F",
     allowedCharacters: ["u", "i", "e", "a", "ü", "t", "k", "m", "l", "y", "ş", "f", "g", "ğ", "ı", "o", "d", "r", "n", "h", "p", "j", "ö", "v", "c", "ç", "z", "s", "b"],
     wordCount: 80,
-    targetWpm: 30,
+    targetWpm: 35,
     targetAccuracy: 90
   },
   {
@@ -230,7 +230,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["a", "s", "d", "f"],
     wordCount: 50,
-    targetWpm: 15,
+    targetWpm: 20,
     targetAccuracy: 90
   },
   {
@@ -252,7 +252,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["j", "k", "l", "ş"],
     wordCount: 50,
-    targetWpm: 15,
+    targetWpm: 20,
     targetAccuracy: 90
   },
   {
@@ -269,7 +269,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ş", "i"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -278,14 +278,14 @@ export const lessons: Lesson[] = [
     slug: "q-klavye-ders-4-ust-sira-sol-el",
     seoContent: `
       <h2>Ders 4: Üst Sıra Sol El (Q W E R T Y)</h2>
-      <p>Temel sıradaki hakimiyetiniz arttıkça, klavyenin üst sırasına sol el parmaklarınızı uzatmayı öğrenmelisiniz. (Wait/Not: Aslında Y tuşu genellikle sağ el işaret parmağı ile basılır, ancak Q klavyede bazen sol veya sağ ele göre farklı standartlar öğretilebilir. Bu derste Q W E R T Y grubunu pekiştireceksiniz.)</p>
+      <p>Temel sıradaki hakimiyetiniz arttıkça, klavyenin üst sırasına sol el parmaklarınızı uzatmayı öğrenmelisiniz. Bu derste Q W E R T Y grubunu pekiştireceksiniz.</p>
       <p>Temel kural şudur: Parmağınız üst sıradaki harfe basıp hemen ardından tekrar <strong>temel sıradaki kendi yuvasına</strong> dönmelidir.</p>
     `,
     difficulty: "beginner",
     keyboardType: "Q",
     allowedCharacters: ["q", "w", "e", "r", "t", "y"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -301,7 +301,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["y", "u", "ı", "o", "p"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -317,7 +317,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["y", "u", "ı", "o", "p", "ğ", "ü"],
     wordCount: 60,
-    targetWpm: 18,
+    targetWpm: 22,
     targetAccuracy: 90
   },
   {
@@ -333,7 +333,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["q", "w", "e", "r", "t", "y", "u", "ı", "o", "p", "ğ", "ü"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 26,
     targetAccuracy: 90
   },
   {
@@ -350,7 +350,7 @@ export const lessons: Lesson[] = [
     allowedCharacters: ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ş", "i", "q", "w", "e", "r", "t", "y", "u", "ı", "o", "p", "ğ", "ü"],
     customWords: ["defter", "kitap", "okul", "kedi", "hayat", "ay", "dağ", "portakal", "halı", "perde", "kapı", "kutu", "para", "dede", "hala", "dayı", "yol", "gel", "git", "al", "oku", "koş", "dur", "at", "tut", "kır", "yap", "gül", "kış", "kuş", "ses", "su", "ot"],
     wordCount: 60,
-    targetWpm: 25,
+    targetWpm: 30,
     targetAccuracy: 90
   },
   {
@@ -365,7 +365,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["z", "x", "c", "v", "b"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -381,7 +381,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["n", "m", "ö", "ç"],
     wordCount: 60,
-    targetWpm: 20,
+    targetWpm: 24,
     targetAccuracy: 90
   },
   {
@@ -397,7 +397,7 @@ export const lessons: Lesson[] = [
     keyboardType: "Q",
     allowedCharacters: ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ş", "i", "q", "w", "e", "r", "t", "y", "u", "ı", "o", "p", "ğ", "ü", "z", "x", "c", "v", "b", "n", "m", "ö", "ç"],
     wordCount: 80,
-    targetWpm: 30,
+    targetWpm: 35,
     targetAccuracy: 90
   }
 ];
