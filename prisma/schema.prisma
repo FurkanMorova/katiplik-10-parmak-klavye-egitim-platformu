@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role     @default(STUDENT)
+  isExternal Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // İlişkiler
+  results   LessonResult[]
+}
+
+model LessonResult {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String   // "f-1", "q-4" veya sınav metni id'si
+  wpm          Int
+  errors       Int
+  timeSeconds  Float
+  accuracy     Float
+  correctWords Int      @default(0)
+  incorrectWords Int    @default(0)
+  errorRate    Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ExamContent {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
